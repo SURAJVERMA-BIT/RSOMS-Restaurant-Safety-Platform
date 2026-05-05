@@ -343,10 +343,24 @@ def menu_add():
             available=form.available.data
         )
         db.session.add(item)
+        db.session.flush()
+
+        if form.image.data:
+            f = form.image.data
+            if allowed_file(f.filename):
+                ext = f.filename.rsplit('.', 1)[1].lower()
+                filename = secure_filename(f'menu_{restaurant.id}_{item.id}.{ext}')
+                filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                f.save(filepath)
+                item.image_path = filename
+
         db.session.commit()
         flash(f'"{item.name}" added to menu!', 'success')
     else:
-        flash('Error adding item. Check all fields.', 'danger')
+        for field, errors in form.errors.items():
+            for error in errors:
+                label = getattr(form, field).label.text if hasattr(getattr(form, field), 'label') else field
+                flash(f'{label}: {error}', 'danger')
     return redirect(url_for('menu'))
 
 
@@ -364,8 +378,23 @@ def menu_edit(item_id):
         item.category = form.category.data
         item.is_veg = form.is_veg.data
         item.available = form.available.data
+
+        if form.image.data:
+            f = form.image.data
+            if allowed_file(f.filename):
+                ext = f.filename.rsplit('.', 1)[1].lower()
+                filename = secure_filename(f'menu_{restaurant.id}_{item.id}.{ext}')
+                filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                f.save(filepath)
+                item.image_path = filename
+
         db.session.commit()
         flash(f'"{item.name}" updated!', 'success')
+    else:
+        for field, errors in form.errors.items():
+            for error in errors:
+                label = getattr(form, field).label.text if hasattr(getattr(form, field), 'label') else field
+                flash(f'{label}: {error}', 'danger')
     return redirect(url_for('menu'))
 
 
@@ -534,6 +563,7 @@ def hygiene():
 @staff_or_admin
 def hygiene_submit():
     restaurant = get_restaurant()
+    form = HygieneChecklistForm()
     ctype = request.form.get('checklist_type', 'daily')
     tasks_template = DAILY_TASKS if ctype == 'daily' else WEEKLY_TASKS
     tasks_result = {}
@@ -555,6 +585,27 @@ def hygiene_submit():
         notes=request.form.get('notes', '')
     )
     db.session.add(checklist)
+    db.session.flush()
+
+    if form.validate_on_submit():
+        if form.kitchen_photo.data:
+            f = form.kitchen_photo.data
+            if allowed_file(f.filename):
+                ext = f.filename.rsplit('.', 1)[1].lower()
+                filename = secure_filename(f'kitchen_{restaurant.id}_{checklist.id}.{ext}')
+                filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                f.save(filepath)
+                checklist.kitchen_photo = filename
+
+        if form.restaurant_photo.data:
+            f = form.restaurant_photo.data
+            if allowed_file(f.filename):
+                ext = f.filename.rsplit('.', 1)[1].lower()
+                filename = secure_filename(f'restaurant_{restaurant.id}_{checklist.id}.{ext}')
+                filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                f.save(filepath)
+                checklist.restaurant_photo = filename
+
     restaurant.calculate_and_update_score()
     db.session.commit()
     flash(f'{ctype.title()} checklist submitted! Score: {checklist.score_pct}%', 'success')

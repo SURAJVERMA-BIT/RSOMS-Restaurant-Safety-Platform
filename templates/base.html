@@ -93,8 +93,10 @@
 <div class="main-content">
   <div class="topbar">
     <div class="d-flex align-items-center gap-3">
-      <button class="sidebar-toggle" onclick="toggleSidebar()">
-        <i class="fa-solid fa-bars"></i>
+      <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" aria-label="Toggle sidebar">
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
       </button>
       <h6 class="topbar-title">{% block page_title %}Dashboard{% endblock %}</h6>
     </div>
@@ -176,13 +178,29 @@
 
 <script>
 function toggleSidebar() {
-  document.getElementById('sidebar').classList.toggle('open');
-  document.getElementById('sidebarOverlay').classList.toggle('show');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  const toggle = document.getElementById('sidebarToggle');
+  const isOpen = sidebar.classList.toggle('open');
+  overlay.classList.toggle('show');
+  toggle.classList.toggle('active');
+  // Lock body scroll when sidebar is open on mobile
+  if (window.innerWidth <= 992) {
+    document.body.style.overflow = isOpen ? 'hidden' : '';
+  }
 }
 function closeSidebar() {
   document.getElementById('sidebar').classList.remove('open');
   document.getElementById('sidebarOverlay').classList.remove('show');
+  document.getElementById('sidebarToggle').classList.remove('active');
+  document.body.style.overflow = '';
 }
+// Reset body scroll on resize to desktop
+window.addEventListener('resize', function() {
+  if (window.innerWidth > 992) {
+    document.body.style.overflow = '';
+  }
+});
 </script>
 </body>
 </html>

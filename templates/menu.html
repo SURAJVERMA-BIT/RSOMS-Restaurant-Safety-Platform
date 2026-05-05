@@ -7,7 +7,7 @@
   <div>
     <p class="text-muted mb-0" style="font-size:14px;">{{ items|length }} items across {{ categories|length }} categories</p>
   </div>
-  <button class="btn-primary-custom" data-bs-toggle="modal" data-bs-target="#addItemModal">
+  <button class="btn-primary-custom btn-lg" data-bs-toggle="modal" data-bs-target="#addItemModal">
     <i class="fa-solid fa-plus"></i> Add Menu Item
   </button>
 </div>
@@ -20,7 +20,7 @@
         <span class="ms-2" style="background:#f0f4f8;color:#636e72;font-size:11px;padding:2px 8px;border-radius:10px;font-weight:600;">{{ cat_items|length }}</span>
       </span>
     </div>
-    <div class="card-body p-0">
+    <div class="card-body p-0 table-responsive-wrapper">
       <table class="table-clean w-100">
         <thead>
           <tr>
@@ -31,13 +31,22 @@
           {% for item in cat_items %}
           <tr>
             <td>
-              <div class="d-flex align-items-center gap-2">
-                <span class="veg-dot {{ 'veg' if item.is_veg else 'nonveg' }}"></span>
-                <div>
-                  <div style="font-weight:600;">{{ item.name }}</div>
-                  {% if item.description %}
-                  <div style="font-size:12px;color:#aaa;">{{ item.description[:60] }}{% if item.description|length > 60 %}...{% endif %}</div>
-                  {% endif %}
+              <div class="d-flex align-items-center gap-3">
+                {% if item.image_path %}
+                <img src="{{ url_for('static', filename='uploads/' + item.image_path) }}" alt="" style="width:48px;height:48px;object-fit:cover;border-radius:10px;border:1px solid #e8ecf0;">
+                {% else %}
+                <div style="width:48px;height:48px;background:#f0f4f8;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#c0c0c0;">
+                  <i class="fa-solid fa-utensils"></i>
+                </div>
+                {% endif %}
+                <div class="d-flex align-items-center gap-2">
+                  <span class="veg-dot {{ 'veg' if item.is_veg else 'nonveg' }}"></span>
+                  <div>
+                    <div style="font-weight:600;">{{ item.name }}</div>
+                    {% if item.description %}
+                    <div style="font-size:12px;color:#aaa;">{{ item.description[:60] }}{% if item.description|length > 60 %}...{% endif %}</div>
+                    {% endif %}
+                  </div>
                 </div>
               </div>
             </td>
@@ -59,7 +68,7 @@
             </td>
             <td>
               <div class="d-flex gap-1">
-                <button class="btn btn-sm" style="background:#eaf4fd;color:#3498db;border:none;" onclick="editItem({{ item.id }}, '{{ item.name|e }}', '{{ item.description|e }}', {{ item.price }}, '{{ item.category }}', {{ 'true' if item.is_veg else 'false' }}, {{ 'true' if item.available else 'false' }})">
+                <button class="btn btn-sm" style="background:#eaf4fd;color:#3498db;border:none;" onclick="editItem({{ item.id }}, '{{ item.name|e }}', '{{ item.description|e }}', {{ item.price }}, '{{ item.category }}', {{ 'true' if item.is_veg else 'false' }}, {{ 'true' if item.available else 'false' }}, '{{ item.image_path|e }}')">
                   <i class="fa-solid fa-pen-to-square"></i>
                 </button>
                 <button class="btn btn-sm" style="background:#fdedec;color:#e74c3c;border:none;" onclick="confirmDelete({{ item.id }}, '{{ item.name|e }}')">
@@ -77,13 +86,12 @@
 {% else %}
 <div class="card">
   <div class="card-body">
-    <div class="empty-state">
-      <i class="fa-solid fa-utensils"></i>
-      <h5>No menu items yet</h5>
-      <p>Add your first item to start building your menu.</p>
-      <button class="btn-primary-custom" data-bs-toggle="modal" data-bs-target="#addItemModal">
-        <i class="fa-solid fa-plus"></i> Add First Item
-      </button>
+    <div class="empty-state premium-empty">
+      <div class="empty-icon-wrap">
+        <i class="fa-solid fa-utensils"></i>
+      </div>
+      <h4 class="empty-title">Your menu is empty</h4>
+      <p class="empty-sub">Add dishes, drinks, and specials so customers can browse what you offer.</p>
     </div>
   </div>
 </div>
@@ -97,7 +105,7 @@
         <h5 class="modal-title fw-bold"><i class="fa-solid fa-plus me-2 text-success"></i>Add Menu Item</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <form method="POST" action="{{ url_for('menu_add') }}" novalidate>
+      <form method="POST" action="{{ url_for('menu_add') }}" enctype="multipart/form-data" novalidate>
         {{ form.hidden_tag() }}
         <div class="modal-body">
           <div class="row g-3">
@@ -116,6 +124,11 @@
             <div class="col-12">
               <label class="form-label">Description</label>
               {{ form.description(class="form-control", rows=2, placeholder="Brief description...") }}
+            </div>
+            <div class="col-12">
+              <label class="form-label">Item Image</label>
+              {{ form.image(class="form-control") }}
+              <small class="text-muted">JPG or PNG — max 5MB</small>
             </div>
             <div class="col-6">
               <div class="form-check form-switch mt-2">
@@ -148,10 +161,14 @@
         <h5 class="modal-title fw-bold"><i class="fa-solid fa-pen-to-square me-2 text-primary"></i>Edit Menu Item</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <form method="POST" id="editItemForm" novalidate>
+      <form method="POST" id="editItemForm" enctype="multipart/form-data" novalidate>
         {{ form.hidden_tag() }}
         <div class="modal-body">
           <div class="row g-3">
+            <div class="col-12 text-center" id="editImagePreviewBox" style="display:none;">
+              <img id="editImagePreview" src="" alt="Current" style="width:80px;height:80px;object-fit:cover;border-radius:12px;border:1px solid #e8ecf0;">
+              <div style="font-size:11px;color:#aaa;margin-top:4px;">Current image</div>
+            </div>
             <div class="col-12">
               <label class="form-label">Item Name *</label>
               <input type="text" name="name" id="edit_name" class="form-control">
@@ -171,6 +188,11 @@
             <div class="col-12">
               <label class="form-label">Description</label>
               <textarea name="description" id="edit_description" class="form-control" rows="2"></textarea>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Change Image</label>
+              <input type="file" name="image" id="edit_image" class="form-control" accept="image/png,image/jpeg">
+              <small class="text-muted">Leave empty to keep current image</small>
             </div>
             <div class="col-6">
               <div class="form-check form-switch mt-2">
@@ -220,7 +242,7 @@
 
 {% block extra_scripts %}
 <script>
-function editItem(id, name, desc, price, cat, isVeg, avail) {
+function editItem(id, name, desc, price, cat, isVeg, avail, imagePath) {
   document.getElementById('editItemForm').action = '/menu/' + id + '/edit';
   document.getElementById('edit_name').value = name;
   document.getElementById('edit_description').value = desc;
@@ -228,6 +250,15 @@ function editItem(id, name, desc, price, cat, isVeg, avail) {
   document.getElementById('edit_category').value = cat;
   document.getElementById('edit_is_veg').checked = isVeg;
   document.getElementById('edit_available').checked = avail;
+  const previewBox = document.getElementById('editImagePreviewBox');
+  const previewImg = document.getElementById('editImagePreview');
+  if (imagePath) {
+    previewImg.src = '/static/uploads/' + imagePath;
+    previewBox.style.display = 'block';
+  } else {
+    previewBox.style.display = 'none';
+    previewImg.src = '';
+  }
   new bootstrap.Modal(document.getElementById('editItemModal')).show();
 }
 function confirmDelete(id, name) {

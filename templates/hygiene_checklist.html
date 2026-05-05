@@ -32,7 +32,7 @@
           <span id="daily-progress" style="font-size:13px;color:#27ae60;font-weight:600;">0 / {{ daily_tasks|length }}</span>
         </div>
         <div class="card-body">
-          <form method="POST" action="{{ url_for('hygiene_submit') }}" id="dailyForm">
+          <form method="POST" action="{{ url_for('hygiene_submit') }}" id="dailyForm" enctype="multipart/form-data">
             {{ form.hidden_tag() }}
             <input type="hidden" name="checklist_type" value="daily">
             {% for task in daily_tasks %}
@@ -42,6 +42,14 @@
               <i class="fa-solid fa-check ms-auto" style="color:#27ae60;display:none;" id="check_{{ task.key }}"></i>
             </div>
             {% endfor %}
+            <div class="mt-3">
+              <label class="form-label">Kitchen Photo <small class="text-muted">(proof of compliance)</small></label>
+              {{ form.kitchen_photo(class="form-control") }}
+            </div>
+            <div class="mt-3">
+              <label class="form-label">Restaurant Photo <small class="text-muted">(dining area)</small></label>
+              {{ form.restaurant_photo(class="form-control") }}
+            </div>
             <div class="mt-3">
               <label class="form-label">Additional Notes</label>
               {{ form.notes(class="form-control", rows=2, placeholder="Any issues observed today...") }}
@@ -62,7 +70,7 @@
           <span id="weekly-progress" style="font-size:13px;color:#3498db;font-weight:600;">0 / {{ weekly_tasks|length }}</span>
         </div>
         <div class="card-body">
-          <form method="POST" action="{{ url_for('hygiene_submit') }}" id="weeklyForm">
+          <form method="POST" action="{{ url_for('hygiene_submit') }}" id="weeklyForm" enctype="multipart/form-data">
             {{ form.hidden_tag() }}
             <input type="hidden" name="checklist_type" value="weekly">
             {% for task in weekly_tasks %}
@@ -72,6 +80,14 @@
               <i class="fa-solid fa-check ms-auto" style="color:#3498db;display:none;" id="wcheck_{{ task.key }}"></i>
             </div>
             {% endfor %}
+            <div class="mt-3">
+              <label class="form-label">Kitchen Photo <small class="text-muted">(proof of compliance)</small></label>
+              {{ form.kitchen_photo(class="form-control") }}
+            </div>
+            <div class="mt-3">
+              <label class="form-label">Restaurant Photo <small class="text-muted">(dining area)</small></label>
+              {{ form.restaurant_photo(class="form-control") }}
+            </div>
             <div class="mt-3">
               <label class="form-label">Notes</label>
               {{ form.notes(class="form-control", rows=2, placeholder="Deep-clean observations...") }}
@@ -127,7 +143,7 @@
       <div class="card-body p-0">
         {% if history %}
         <table class="table-clean w-100">
-          <thead><tr><th>Date</th><th>Type</th><th>Score</th><th>By</th></tr></thead>
+          <thead><tr><th>Date</th><th>Type</th><th>Score</th><th>By</th><th>Photos</th></tr></thead>
           <tbody>
             {% for c in history %}
             <tr>
@@ -148,6 +164,23 @@
                 </div>
               </td>
               <td style="font-size:12px;color:#aaa;">{{ c.staff.username[:8] if c.staff else 'Unknown' }}</td>
+              <td>
+                <div class="d-flex gap-1">
+                  {% if c.kitchen_photo %}
+                  <a href="{{ url_for('static', filename='uploads/' + c.kitchen_photo) }}" target="_blank" title="Kitchen" class="btn btn-sm" style="background:#eafaf1;color:#1e8449;border:none;padding:2px 8px;font-size:11px;">
+                    <i class="fa-solid fa-utensils"></i>
+                  </a>
+                  {% endif %}
+                  {% if c.restaurant_photo %}
+                  <a href="{{ url_for('static', filename='uploads/' + c.restaurant_photo) }}" target="_blank" title="Restaurant" class="btn btn-sm" style="background:#eaf4fd;color:#1a5276;border:none;padding:2px 8px;font-size:11px;">
+                    <i class="fa-solid fa-store"></i>
+                  </a>
+                  {% endif %}
+                  {% if not c.kitchen_photo and not c.restaurant_photo %}
+                  <span style="font-size:11px;color:#ccc;">—</span>
+                  {% endif %}
+                </div>
+              </td>
             </tr>
             {% endfor %}
           </tbody>
