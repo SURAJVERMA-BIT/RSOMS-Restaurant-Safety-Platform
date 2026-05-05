@@ -1,0 +1,352 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+{% if not restaurant %}
+<div class="card text-center p-5">
+  <i class="fa-solid fa-store fa-3x mb-3" style="color:#27ae60;opacity:0.5;"></i>
+  <h4>No restaurant found</h4>
+  <p class="text-muted">Please set up your restaurant profile to get started.</p>
+  <a href="{{ url_for('restaurant_profile') }}" class="btn-primary-custom mx-auto">Setup Restaurant</a>
+</div>
+{% else %}
+
+<!-- ══ FSSAI ALERT BANNER ══ -->
+{% set fstatus = restaurant.fssai_status %}
+{% if fstatus != 'valid' %}
+<div class="fssai-banner {{ fstatus }} mb-4">
+  <i class="fa-solid fa-{% if fstatus == 'expired' or fstatus == 'critical' %}triangle-exclamation{% elif fstatus == 'warning' or fstatus == 'notice' %}clock{% else %}file-circle-xmark{% endif %} fa-lg"></i>
+  <div>
+    {% if fstatus == 'not_uploaded' %}<strong>FSSAI Certificate not uploaded.</strong> Upload it in Restaurant Profile to improve your safety score.
+    {% elif fstatus == 'expired' %}<strong>FSSAI Certificate EXPIRED!</strong> Renew immediately to avoid legal penalties.
+    {% elif fstatus == 'critical' %}<strong>FSSAI Certificate expires in {{ restaurant.fssai_days_to_expiry }} days!</strong> Renew urgently.
+    {% elif fstatus == 'warning' %}<strong>FSSAI Certificate expires in {{ restaurant.fssai_days_to_expiry }} days.</strong> Plan renewal now.
+    {% elif fstatus == 'notice' %}<strong>FSSAI Certificate expires in {{ restaurant.fssai_days_to_expiry }} days.</strong> Schedule renewal.
+    {% endif %}
+  </div>
+  <a href="{{ url_for('restaurant_profile') }}" class="btn btn-sm ms-auto" style="background:rgba(0,0,0,0.1);border:none;font-weight:600;">Manage →</a>
+</div>
+{% endif %}
+
+<!-- ══ TODAY CHECKLIST ALERT ══ -->
+{% if not today_checklist %}
+<div class="alert alert-warning mb-4">
+  <i class="fa-solid fa-clipboard-list"></i>
+  <strong>Today's hygiene checklist not submitted yet.</strong>
+  <a href="{{ url_for('hygiene') }}" class="ms-2 fw-bold">Submit now →</a>
+</div>
+{% endif %}
+
+<!-- ══ STAT CARDS ══ -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3">
+    <div class="stat-card green">
+      <div class="stat-icon"><i class="fa-solid fa-shield-halved"></i></div>
+      <div class="stat-value">{{ stats.safety_score }}</div>
+      <div class="stat-label">Safety Score / 100</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="stat-card orange">
+      <div class="stat-icon"><i class="fa-solid fa-receipt"></i></div>
+      <div class="stat-value">{{ stats.today_orders }}</div>
+      <div class="stat-label">Orders Today</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="stat-card blue">
+      <div class="stat-icon"><i class="fa-solid fa-fire-burner"></i></div>
+      <div class="stat-value">{{ stats.active_orders }}</div>
+      <div class="stat-label">Active Orders</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="stat-card purple">
+      <div class="stat-icon"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+      <div class="stat-value">{{ stats.total_revenue | int }}</div>
+      <div class="stat-label">Total Revenue (₹)</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SECOND ROW STATS ══ -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3">
+    <div class="stat-card teal">
+      <div class="stat-icon"><i class="fa-solid fa-book-open"></i></div>
+      <div class="stat-value">{{ stats.menu_count }}</div>
+      <div class="stat-label">Menu Items</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="stat-card red">
+      <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+      <div class="stat-value">{{ stats.staff_count }}</div>
+      <div class="stat-label">Staff Records</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="stat-card green">
+      <div class="stat-icon"><i class="fa-solid fa-star"></i></div>
+      <div class="stat-value">{{ stats.avg_rating }}</div>
+      <div class="stat-label">Avg Rating</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="stat-card orange">
+      <div class="stat-icon"><i class="fa-solid fa-comment"></i></div>
+      <div class="stat-value">{{ stats.feedback_count }}</div>
+      <div class="stat-label">Reviews</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MAIN GRID ══ -->
+<div class="row g-4">
+  <!-- Safety Score + Badge Panel -->
+  <div class="col-lg-4">
+    <div class="card h-100">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="fa-solid fa-shield-halved me-2 text-success"></i>Safety Overview</span>
+        <a href="{{ url_for('hygiene') }}" class="btn btn-sm" style="background:#f0f9f4;color:#27ae60;border:none;font-size:12px;">Checklist →</a>
+      </div>
+      <div class="card-body text-center">
+        <!-- Donut score -->
+        <div style="position:relative;width:120px;height:120px;margin:0 auto 16px;">
+          <canvas id="scoreDonut" width="120" height="120"></canvas>
+          <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;">
+            <div style="font-size:26px;font-weight:900;color:#27ae60;">{{ stats.safety_score }}</div>
+            <div style="font-size:10px;color:#aaa;font-weight:600;">/ 100</div>
+          </div>
+        </div>
+
+        <!-- Badge -->
+        <div class="mb-3">
+          {% if stats.badge == 'gold' %}
+            <span class="safety-badge gold"><i class="fa-solid fa-medal"></i> Gold Badge</span>
+          {% elif stats.badge == 'silver' %}
+            <span class="safety-badge silver"><i class="fa-solid fa-medal"></i> Silver Badge</span>
+          {% elif stats.badge == 'bronze' %}
+            <span class="safety-badge bronze"><i class="fa-solid fa-medal"></i> Bronze Badge</span>
+          {% elif stats.badge == 'red' %}
+            <span class="safety-badge red"><i class="fa-solid fa-triangle-exclamation"></i> At Risk</span>
+          {% else %}
+            <span class="safety-badge unrated">Not Rated Yet</span>
+          {% endif %}
+        </div>
+
+        <!-- Score breakdown -->
+        <div style="text-align:left;">
+          <div class="d-flex justify-content-between mb-1" style="font-size:12px;">
+            <span>Daily Checklists</span><span class="fw-bold">60%</span>
+          </div>
+          <div class="score-bar mb-2">
+            <div class="score-bar-fill" style="width:60%;background:linear-gradient(90deg,#27ae60,#1e8449);"></div>
+          </div>
+          <div class="d-flex justify-content-between mb-1" style="font-size:12px;">
+            <span>Weekly Deep-Clean</span><span class="fw-bold">20%</span>
+          </div>
+          <div class="score-bar mb-2">
+            <div class="score-bar-fill" style="width:20%;background:linear-gradient(90deg,#3498db,#2980b9);"></div>
+          </div>
+          <div class="d-flex justify-content-between mb-1" style="font-size:12px;">
+            <span>Staff Training</span><span class="fw-bold">20%</span>
+          </div>
+          <div class="score-bar">
+            <div class="score-bar-fill" style="width:20%;background:linear-gradient(90deg,#e67e22,#d35400);"></div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+        <!-- FSSAI Status -->
+        <div class="d-flex align-items-center gap-2 justify-content-center">
+          {% if fstatus == 'valid' %}
+            <span class="badge" style="background:#d5f5e3;color:#1e8449;padding:6px 12px;border-radius:20px;font-size:12px;">
+              <i class="fa-solid fa-check-circle me-1"></i>FSSAI Valid
+            </span>
+          {% elif fstatus == 'not_uploaded' %}
+            <span class="badge" style="background:#f0f0f0;color:#aaa;padding:6px 12px;border-radius:20px;font-size:12px;">
+              <i class="fa-solid fa-file-circle-xmark me-1"></i>FSSAI Not Uploaded
+            </span>
+          {% else %}
+            <span class="badge" style="background:#fdedec;color:#922b21;padding:6px 12px;border-radius:20px;font-size:12px;">
+              <i class="fa-solid fa-triangle-exclamation me-1"></i>FSSAI {{ fstatus.replace('_',' ').title() }}
+            </span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hygiene Score History Chart -->
+  <div class="col-lg-8">
+    <div class="card h-100">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="fa-solid fa-chart-line me-2" style="color:#3498db;"></i>Hygiene Score History</span>
+        <a href="{{ url_for('analytics') }}" class="btn btn-sm" style="background:#eaf4fd;color:#3498db;border:none;font-size:12px;">Full Analytics →</a>
+      </div>
+      <div class="card-body">
+        {% if score_history != '[]' %}
+          <canvas id="hygieneChart" height="200"></canvas>
+        {% else %}
+          <div class="empty-state" style="padding:40px 20px;">
+            <i class="fa-solid fa-chart-line"></i>
+            <p>No checklist history yet.<br>Submit your first daily checklist to see trends.</p>
+            <a href="{{ url_for('hygiene') }}" class="btn-primary-custom" style="font-size:13px;">Submit Checklist</a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Orders -->
+  <div class="col-lg-7">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="fa-solid fa-receipt me-2" style="color:#e67e22;"></i>Recent Orders</span>
+        <a href="{{ url_for('orders') }}" class="btn btn-sm" style="background:#fef5e7;color:#e67e22;border:none;font-size:12px;">View All →</a>
+      </div>
+      <div class="card-body p-0">
+        {% if recent_orders %}
+        <table class="table-clean w-100">
+          <thead>
+            <tr>
+              <th>#</th><th>Customer</th><th>Table</th><th>Amount</th><th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for order in recent_orders %}
+            <tr>
+              <td style="font-weight:700;color:#27ae60;">#{{ order.id }}</td>
+              <td>{{ order.customer_name }}</td>
+              <td>{{ order.table_number or '—' }}</td>
+              <td>₹{{ order.total_amount }}</td>
+              <td><span class="status-pill {{ order.status }}">{{ order.status.title() }}</span></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state" style="padding:30px;">
+          <i class="fa-solid fa-receipt"></i>
+          <p>No orders yet. Create your first order!</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Notifications Panel -->
+  <div class="col-lg-5">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="fa-solid fa-bell me-2" style="color:#8e44ad;"></i>Alerts</span>
+        <a href="{{ url_for('notifications') }}" class="btn btn-sm" style="background:#f5eef8;color:#8e44ad;border:none;font-size:12px;">All Alerts →</a>
+      </div>
+      <div class="card-body">
+        {% if notifications %}
+          {% for n in notifications %}
+          <div class="d-flex gap-3 mb-3 p-3" style="background:#{% if n.type == 'danger' %}fdedec{% elif n.type == 'warning' %}fef9e7{% else %}eaf4fd{% endif %};border-radius:10px;">
+            <i class="fa-solid {{ n.icon }}" style="color:#{% if n.type == 'danger' %}e74c3c{% elif n.type == 'warning' %}f39c12{% else %}3498db{% endif %};margin-top:2px;"></i>
+            <span style="font-size:13px;">{{ n.msg }}</span>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="text-center py-4">
+            <i class="fa-solid fa-check-circle fa-2x" style="color:#27ae60;opacity:0.5;"></i>
+            <p style="color:#aaa;font-size:13px;margin-top:8px;">All clear! No pending alerts.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header"><i class="fa-solid fa-bolt me-2" style="color:#e67e22;"></i>Quick Actions</div>
+      <div class="card-body">
+        <div class="row g-2">
+          {% set actions = [
+            (url_for('orders'), 'fa-plus','#27ae60','New Order'),
+            (url_for('hygiene'), 'fa-clipboard-check','#3498db','Daily Checklist'),
+            (url_for('menu'), 'fa-book-open','#e67e22','Manage Menu'),
+            (url_for('order_kds'), 'fa-kitchen-set','#8e44ad','Kitchen Display'),
+            (url_for('staff_training'), 'fa-user-graduate','#1abc9c','Staff Training'),
+            (url_for('analytics'), 'fa-chart-bar','#e74c3c','View Analytics'),
+          ] %}
+          {% for href, icon, color, label in actions %}
+          <div class="col-6 col-md-4 col-lg-2">
+            <a href="{{ href }}" style="text-decoration:none;">
+              <div class="text-center p-3" style="background:#f8fafc;border-radius:12px;border:1.5px solid #edf2f7;transition:all 0.2s;" onmouseover="this.style.borderColor='{{ color }}';this.style.background='{{ color }}15'" onmouseout="this.style.borderColor='#edf2f7';this.style.background='#f8fafc'">
+                <i class="fa-solid {{ icon }} fa-lg mb-2" style="color:{{ color }};"></i>
+                <div style="font-size:12px;font-weight:600;color:#444;">{{ label }}</div>
+              </div>
+            </a>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endif %}
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+const scoreData = {{ score_history | safe }};
+const score = {{ stats.safety_score if stats else 0 }};
+
+// Donut chart
+const donutCtx = document.getElementById('scoreDonut');
+if (donutCtx) {
+  new Chart(donutCtx, {
+    type: 'doughnut',
+    data: {
+      datasets: [{
+        data: [score, 100 - score],
+        backgroundColor: [
+          score >= 90 ? '#f9ca24' : score >= 75 ? '#b2bec3' : score >= 60 ? '#e17055' : '#e74c3c',
+          '#f0f4f8'
+        ],
+        borderWidth: 0, cutout: '80%'
+      }]
+    },
+    options: { plugins: { legend: { display: false }, tooltip: { enabled: false } }, animation: { duration: 1200 } }
+  });
+}
+
+// Hygiene history line chart
+const hygieneCtx = document.getElementById('hygieneChart');
+if (hygieneCtx && scoreData.length > 0) {
+  new Chart(hygieneCtx, {
+    type: 'line',
+    data: {
+      labels: scoreData.map(d => d.date),
+      datasets: [{
+        label: 'Hygiene Score %',
+        data: scoreData.map(d => d.score),
+        borderColor: '#27ae60',
+        backgroundColor: 'rgba(39,174,96,0.1)',
+        borderWidth: 2.5,
+        pointBackgroundColor: '#27ae60',
+        pointRadius: 5,
+        fill: true,
+        tension: 0.4
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, max: 100, grid: { color: '#f0f4f8' }, ticks: { callback: v => v + '%' } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+}
+</script>
+{% endblock %}

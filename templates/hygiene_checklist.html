@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+{% block title %}Hygiene Checklist{% endblock %}
+{% block page_title %}Hygiene Checklist{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+  <!-- Left: Submission Form -->
+  <div class="col-lg-7">
+    <!-- Tab Selector -->
+    <div style="background:white;border-radius:12px;padding:4px;box-shadow:0 1px 6px rgba(0,0,0,0.06);display:inline-flex;gap:2px;margin-bottom:20px;">
+      <button class="tab-btn active" id="tab-daily" onclick="switchTab('daily')">
+        <i class="fa-solid fa-calendar-day me-1"></i> Daily Checklist
+      </button>
+      <button class="tab-btn" id="tab-weekly" onclick="switchTab('weekly')">
+        <i class="fa-solid fa-calendar-week me-1"></i> Weekly Deep-Clean
+      </button>
+    </div>
+
+    <!-- Daily Form -->
+    <div id="form-daily">
+      {% if today_checklist %}
+      <div class="alert alert-success mb-3">
+        <i class="fa-solid fa-check-circle me-2"></i>
+        Today's daily checklist already submitted ({{ today_checklist.score_pct }}% score).
+        You can submit again to update.
+      </div>
+      {% endif %}
+
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span><i class="fa-solid fa-clipboard-check me-2 text-success"></i>Daily Hygiene Checklist</span>
+          <span id="daily-progress" style="font-size:13px;color:#27ae60;font-weight:600;">0 / {{ daily_tasks|length }}</span>
+        </div>
+        <div class="card-body">
+          <form method="POST" action="{{ url_for('hygiene_submit') }}" id="dailyForm">
+            {{ form.hidden_tag() }}
+            <input type="hidden" name="checklist_type" value="daily">
+            {% for task in daily_tasks %}
+            <div class="checklist-item" id="ci_{{ task.key }}" onclick="toggleCheck('{{ task.key }}')">
+              <input type="checkbox" name="task_{{ task.key }}" id="task_{{ task.key }}" onchange="updateProgress('daily')">
+              <label for="task_{{ task.key }}">{{ task.label }}</label>
+              <i class="fa-solid fa-check ms-auto" style="color:#27ae60;display:none;" id="check_{{ task.key }}"></i>
+            </div>
+            {% endfor %}
+            <div class="mt-3">
+              <label class="form-label">Additional Notes</label>
+              {{ form.notes(class="form-control", rows=2, placeholder="Any issues observed today...") }}
+            </div>
+            <button type="submit" class="btn-primary-custom mt-3 w-100" style="justify-content:center;">
+              <i class="fa-solid fa-paper-plane me-2"></i>Submit Daily Checklist
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Weekly Form -->
+    <div id="form-weekly" style="display:none;">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span><i class="fa-solid fa-broom me-2" style="color:#3498db;"></i>Weekly Deep-Clean Checklist</span>
+          <span id="weekly-progress" style="font-size:13px;color:#3498db;font-weight:600;">0 / {{ weekly_tasks|length }}</span>
+        </div>
+        <div class="card-body">
+          <form method="POST" action="{{ url_for('hygiene_submit') }}" id="weeklyForm">
+            {{ form.hidden_tag() }}
+            <input type="hidden" name="checklist_type" value="weekly">
+            {% for task in weekly_tasks %}
+            <div class="checklist-item" id="wci_{{ task.key }}" onclick="toggleCheckW('{{ task.key }}')">
+              <input type="checkbox" name="task_{{ task.key }}" id="wtask_{{ task.key }}" onchange="updateProgress('weekly')">
+              <label for="wtask_{{ task.key }}">{{ task.label }}</label>
+              <i class="fa-solid fa-check ms-auto" style="color:#3498db;display:none;" id="wcheck_{{ task.key }}"></i>
+            </div>
+            {% endfor %}
+            <div class="mt-3">
+              <label class="form-label">Notes</label>
+              {{ form.notes(class="form-control", rows=2, placeholder="Deep-clean observations...") }}
+            </div>
+            <button type="submit" class="btn w-100 mt-3" style="background:#3498db;color:white;border:none;border-radius:8px;padding:12px;font-weight:700;">
+              <i class="fa-solid fa-paper-plane me-2"></i>Submit Weekly Checklist
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: Score Summary + History -->
+  <div class="col-lg-5">
+    <!-- Score Widget -->
+    <div class="card mb-3">
+      <div class="card-header"><i class="fa-solid fa-gauge me-2 text-success"></i>Today's Progress</div>
+      <div class="card-body text-center">
+        <div style="position:relative;width:100px;height:100px;margin:0 auto 12px;">
+          <canvas id="progressRing" width="100" height="100"></canvas>
+          <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;">
+            <div style="font-size:22px;font-weight:900;color:#27ae60;" id="liveScore">0</div>
+            <div style="font-size:9px;color:#aaa;font-weight:600;">%</div>
+          </div>
+        </div>
+        <div style="font-size:13px;color:#636e72;">Checklist Completion</div>
+        <div class="score-bar mt-2">
+          <div class="score-bar-fill" id="liveBar" style="width:0%;transition:width 0.5s;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Info boxes -->
+    <div class="row g-2 mb-3">
+      <div class="col-6">
+        <div class="card text-center p-3" style="border-left:4px solid #27ae60;">
+          <div style="font-size:24px;font-weight:800;color:#27ae60;">60%</div>
+          <div style="font-size:11px;color:#aaa;">Daily Weight</div>
+        </div>
+      </div>
+      <div class="col-6">
+        <div class="card text-center p-3" style="border-left:4px solid #3498db;">
+          <div style="font-size:24px;font-weight:800;color:#3498db;">20%</div>
+          <div style="font-size:11px;color:#aaa;">Weekly Weight</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Submission History -->
+    <div class="card">
+      <div class="card-header"><i class="fa-solid fa-history me-2 text-muted"></i>Recent Submissions</div>
+      <div class="card-body p-0">
+        {% if history %}
+        <table class="table-clean w-100">
+          <thead><tr><th>Date</th><th>Type</th><th>Score</th><th>By</th></tr></thead>
+          <tbody>
+            {% for c in history %}
+            <tr>
+              <td>{{ c.date.strftime('%d %b') }}</td>
+              <td>
+                <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;
+                  background:{{ '#eafaf1' if c.checklist_type == 'daily' else '#eaf4fd' }};
+                  color:{{ '#1e8449' if c.checklist_type == 'daily' else '#1a5276' }};">
+                  {{ c.checklist_type.title() }}
+                </span>
+              </td>
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  <div class="score-bar" style="width:60px;">
+                    <div class="score-bar-fill" style="width:{{ c.score_pct }}%;background:{{ '#27ae60' if c.score_pct >= 75 else '#e67e22' if c.score_pct >= 50 else '#e74c3c' }};"></div>
+                  </div>
+                  <span style="font-size:12px;font-weight:600;">{{ c.score_pct }}%</span>
+                </div>
+              </td>
+              <td style="font-size:12px;color:#aaa;">{{ c.staff.username[:8] if c.staff else 'Unknown' }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state" style="padding:30px;">
+          <i class="fa-solid fa-clipboard"></i>
+          <p>No submissions yet.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+const dailyTotal = {{ daily_tasks|length }};
+const weeklyTotal = {{ weekly_tasks|length }};
+let progressChart = null;
+
+function switchTab(type) {
+  document.getElementById('form-daily').style.display = type === 'daily' ? 'block' : 'none';
+  document.getElementById('form-weekly').style.display = type === 'weekly' ? 'block' : 'none';
+  document.getElementById('tab-daily').classList.toggle('active', type === 'daily');
+  document.getElementById('tab-weekly').classList.toggle('active', type === 'weekly');
+}
+
+function toggleCheck(key) {
+  const cb = document.getElementById('task_' + key);
+  cb.checked = !cb.checked;
+  const ci = document.getElementById('ci_' + key);
+  ci.classList.toggle('checked', cb.checked);
+  document.getElementById('check_' + key).style.display = cb.checked ? 'inline' : 'none';
+  updateProgress('daily');
+}
+
+function toggleCheckW(key) {
+  const cb = document.getElementById('wtask_' + key);
+  cb.checked = !cb.checked;
+  const ci = document.getElementById('wci_' + key);
+  ci.classList.toggle('checked', cb.checked);
+  document.getElementById('wcheck_' + key).style.display = cb.checked ? 'inline' : 'none';
+  updateProgress('weekly');
+}
+
+function updateProgress(type) {
+  let checked = 0, total = type === 'daily' ? dailyTotal : weeklyTotal;
+  const prefix = type === 'daily' ? 'task_' : 'wtask_';
+  document.querySelectorAll('[id^="' + prefix + '"]').forEach(cb => { if (cb.checked) checked++; });
+  const pct = total > 0 ? Math.round((checked / total) * 100) : 0;
+  document.getElementById(type + '-progress').textContent = checked + ' / ' + total;
+  if (type === 'daily') updateRing(pct);
+}
+
+function updateRing(pct) {
+  document.getElementById('liveScore').textContent = pct;
+  document.getElementById('liveBar').style.width = pct + '%';
+  if (progressChart) {
+    progressChart.data.datasets[0].data = [pct, 100 - pct];
+    progressChart.update();
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const ctx = document.getElementById('progressRing');
+  if (ctx) {
+    progressChart = new Chart(ctx, {
+      type: 'doughnut',
+      data: { datasets: [{ data: [0, 100], backgroundColor: ['#27ae60', '#f0f4f8'], borderWidth: 0, cutout: '80%' }] },
+      options: { plugins: { legend: { display: false }, tooltip: { enabled: false } }, animation: { duration: 400 } }
+    });
+  }
+});
+</script>
+<style>
+.tab-btn {
+  padding: 8px 20px; border-radius: 8px; border: none; background: transparent;
+  font-weight: 600; font-size: 13px; color: #636e72; cursor: pointer; transition: all 0.2s;
+}
+.tab-btn.active { background: #27ae60; color: white; }
+</style>
+{% endblock %}

@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% block title %}Staff Training{% endblock %}
+{% block page_title %}Staff Training Tracker{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div class="d-flex gap-3">
+    {% set valid_count = records|selectattr('status','equalto','valid')|list|length %}
+    {% set expiring_count = records|selectattr('status','equalto','expiring_soon')|list|length %}
+    {% set expired_count = records|selectattr('status','equalto','expired')|list|length %}
+    <span style="background:#eafaf1;color:#1e8449;padding:6px 14px;border-radius:20px;font-size:13px;font-weight:600;">
+      <i class="fa-solid fa-check me-1"></i>{{ valid_count }} Valid
+    </span>
+    <span style="background:#fef9e7;color:#9a7d0a;padding:6px 14px;border-radius:20px;font-size:13px;font-weight:600;">
+      <i class="fa-solid fa-clock me-1"></i>{{ expiring_count }} Expiring
+    </span>
+    <span style="background:#fdedec;color:#922b21;padding:6px 14px;border-radius:20px;font-size:13px;font-weight:600;">
+      <i class="fa-solid fa-xmark me-1"></i>{{ expired_count }} Expired
+    </span>
+  </div>
+  <button class="btn-primary-custom" data-bs-toggle="modal" data-bs-target="#addTrainingModal">
+    <i class="fa-solid fa-plus"></i> Add Training Record
+  </button>
+</div>
+
+<div class="card">
+  <div class="card-header"><i class="fa-solid fa-user-graduate me-2" style="color:#27ae60;"></i>Training Records</div>
+  <div class="card-body p-0">
+    {% if records %}
+    <table class="table-clean w-100">
+      <thead>
+        <tr>
+          <th>Staff Name</th><th>Training Type</th><th>Completed</th><th>Expiry</th><th>Status</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for rec in records %}
+        <tr>
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              <div style="width:32px;height:32px;border-radius:50%;background:#eafaf1;display:flex;align-items:center;justify-content:center;font-weight:700;color:#27ae60;font-size:13px;">
+                {{ rec.staff_name[0].upper() }}
+              </div>
+              <span style="font-weight:600;">{{ rec.staff_name }}</span>
+            </div>
+          </td>
+          <td>{{ rec.training_type }}</td>
+          <td>{{ rec.completion_date.strftime('%d %b %Y') }}</td>
+          <td>
+            {% if rec.expiry_date %}
+              {{ rec.expiry_date.strftime('%d %b %Y') }}
+              {% if rec.status == 'expiring_soon' %}
+                <br><small style="color:#e67e22;font-size:11px;font-weight:600;">Expires soon!</small>
+              {% elif rec.status == 'expired' %}
+                <br><small style="color:#e74c3c;font-size:11px;font-weight:600;">EXPIRED</small>
+              {% endif %}
+            {% else %}
+              <span style="color:#aaa;">No expiry</span>
+            {% endif %}
+          </td>
+          <td>
+            <span class="training-chip {{ rec.status }}">
+              <i class="fa-solid fa-{% if rec.status == 'valid' %}check{% elif rec.status == 'expiring_soon' %}clock{% else %}xmark{% endif %}"></i>
+              {{ rec.status.replace('_', ' ').title() }}
+            </span>
+          </td>
+          <td>
+            <form method="POST" action="{{ url_for('staff_training_delete', rec_id=rec.id) }}" class="d-inline" onsubmit="return confirm('Delete this training record?')">
+              {{ form.hidden_tag() }}
+              <button type="submit" class="btn btn-sm" style="background:#fdedec;color:#e74c3c;border:none;">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state" style="padding:60px;">
+      <i class="fa-solid fa-user-graduate"></i>
+      <h5>No training records</h5>
+      <p>Add staff training records to improve your safety score.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Training Type Info Cards -->
+<div class="row g-3 mt-2">
+  {% set training_types = [
+    ('Food Safety & Hygiene', 'fa-utensils', '#27ae60', 'FSSAI required. Covers food handling, storage, contamination prevention.'),
+    ('Fire Safety', 'fa-fire-extinguisher', '#e74c3c', 'Annual training on fire prevention and emergency procedures.'),
+    ('First Aid', 'fa-kit-medical', '#3498db', 'Basic first aid and CPR for kitchen emergencies.'),
+    ('FSSAI Compliance', 'fa-file-certificate', '#8e44ad', 'Understanding FSSAI regulations and restaurant compliance.'),
+  ] %}
+  {% for name, icon, color, desc in training_types %}
+  <div class="col-md-6 col-lg-3">
+    <div class="card text-center p-3" style="border-top:3px solid {{ color }};">
+      <i class="fa-solid {{ icon }} fa-lg mb-2" style="color:{{ color }};"></i>
+      <div style="font-size:13px;font-weight:700;">{{ name }}</div>
+      <div style="font-size:11px;color:#aaa;margin-top:4px;">{{ desc }}</div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- ══ ADD TRAINING MODAL ══ -->
+<div class="modal fade" id="addTrainingModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold"><i class="fa-solid fa-user-plus me-2 text-success"></i>Add Training Record</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="POST" action="{{ url_for('staff_training_add') }}" novalidate>
+        {{ form.hidden_tag() }}
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label">Staff Name *</label>
+              {{ form.staff_name(class="form-control", placeholder="Full name of staff member") }}
+            </div>
+            <div class="col-12">
+              <label class="form-label">Training Type *</label>
+              {{ form.training_type(class="form-select") }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Completion Date *</label>
+              {{ form.completion_date(class="form-control") }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Expiry Date</label>
+              {{ form.expiry_date(class="form-control") }}
+              <small class="text-muted">Leave blank if no expiry</small>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn-primary-custom">Add Record</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

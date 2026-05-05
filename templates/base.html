@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}RSOMS{% endblock %} — Restaurant Safety & Operations</title>
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome 6 -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+  <!-- Custom CSS -->
+  <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+{% if current_user.is_authenticated and current_user.role in ('admin', 'staff') %}
+<!-- ══════════ SIDEBAR ══════════ -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-icon"><i class="fa-solid fa-utensils"></i></div>
+    <h5>RSOMS</h5>
+    <small>Restaurant Management</small>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Main</div>
+    <a href="{{ url_for('dashboard') }}" class="nav-item-link {% if request.endpoint == 'dashboard' %}active{% endif %}">
+      <i class="fa-solid fa-gauge nav-icon"></i> Dashboard
+    </a>
+    <a href="{{ url_for('restaurant_profile') }}" class="nav-item-link {% if request.endpoint == 'restaurant_profile' %}active{% endif %}">
+      <i class="fa-solid fa-store nav-icon"></i> Restaurant Profile
+    </a>
+
+    <div class="nav-section-label">Operations</div>
+    <a href="{{ url_for('menu') }}" class="nav-item-link {% if request.endpoint == 'menu' %}active{% endif %}">
+      <i class="fa-solid fa-book-open nav-icon"></i> Menu Management
+    </a>
+    <a href="{{ url_for('orders') }}" class="nav-item-link {% if request.endpoint in ('orders', 'order_kds') %}active{% endif %}">
+      <i class="fa-solid fa-receipt nav-icon"></i> Orders
+    </a>
+    <a href="{{ url_for('order_kds') }}" class="nav-item-link {% if request.endpoint == 'order_kds' %}active{% endif %}">
+      <i class="fa-solid fa-kitchen-set nav-icon"></i> Kitchen Display
+    </a>
+
+    <div class="nav-section-label">Safety & Compliance</div>
+    <a href="{{ url_for('hygiene') }}" class="nav-item-link {% if request.endpoint == 'hygiene' %}active{% endif %}">
+      <i class="fa-solid fa-clipboard-check nav-icon"></i> Hygiene Checklist
+    </a>
+    <a href="{{ url_for('staff_training') }}" class="nav-item-link {% if request.endpoint == 'staff_training' %}active{% endif %}">
+      <i class="fa-solid fa-user-graduate nav-icon"></i> Staff Training
+    </a>
+
+    <div class="nav-section-label">Analytics</div>
+    <a href="{{ url_for('analytics') }}" class="nav-item-link {% if request.endpoint == 'analytics' %}active{% endif %}">
+      <i class="fa-solid fa-chart-line nav-icon"></i> Analytics
+    </a>
+    <a href="{{ url_for('notifications') }}" class="nav-item-link {% if request.endpoint == 'notifications' %}active{% endif %}">
+      <i class="fa-solid fa-bell nav-icon"></i> Notifications
+      {% if notification_count > 0 %}
+        <span class="nav-badge">{{ notification_count }}</span>
+      {% endif %}
+    </a>
+
+    <div class="nav-section-label">Public</div>
+    {% if g_restaurant %}
+    <a href="{{ url_for('public_restaurant', restaurant_id=g_restaurant.id) }}" class="nav-item-link" target="_blank">
+      <i class="fa-solid fa-eye nav-icon"></i> Public Page
+    </a>
+    {% endif %}
+    <a href="{{ url_for('index') }}" class="nav-item-link">
+      <i class="fa-solid fa-house nav-icon"></i> Home
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="avatar">{{ current_user.username[0].upper() }}</div>
+      <div class="user-info">
+        <div class="name">{{ current_user.username }}</div>
+        <div class="role">{{ current_user.role.title() }}</div>
+      </div>
+    </div>
+    <a href="{{ url_for('logout') }}" class="nav-item-link mt-2" style="padding:8px 0;">
+      <i class="fa-solid fa-right-from-bracket nav-icon"></i> Logout
+    </a>
+  </div>
+</aside>
+
+<!-- ══════════ MAIN CONTENT ══════════ -->
+<div class="main-content">
+  <div class="topbar">
+    <div class="d-flex align-items-center gap-3">
+      <button class="sidebar-toggle" onclick="toggleSidebar()">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+      <h6 class="topbar-title">{% block page_title %}Dashboard{% endblock %}</h6>
+    </div>
+    <div class="topbar-actions">
+      {% if g_restaurant %}
+      <span class="d-none d-md-inline">
+        {% if g_restaurant.badge_status == 'gold' %}
+          <span class="safety-badge gold"><i class="fa-solid fa-medal"></i> Gold Safety</span>
+        {% elif g_restaurant.badge_status == 'silver' %}
+          <span class="safety-badge silver"><i class="fa-solid fa-medal"></i> Silver</span>
+        {% elif g_restaurant.badge_status == 'bronze' %}
+          <span class="safety-badge bronze"><i class="fa-solid fa-medal"></i> Bronze</span>
+        {% elif g_restaurant.badge_status == 'red' %}
+          <span class="safety-badge red"><i class="fa-solid fa-triangle-exclamation"></i> At Risk</span>
+        {% else %}
+          <span class="safety-badge unrated">Not Rated</span>
+        {% endif %}
+      </span>
+      {% endif %}
+
+      <a href="{{ url_for('notifications') }}" class="position-relative" style="color:#636e72;">
+        <i class="fa-solid fa-bell fs-5"></i>
+        {% if notification_count > 0 %}
+          <span class="notif-dot">{{ notification_count }}</span>
+        {% endif %}
+      </a>
+    </div>
+  </div>
+
+  <div class="page-body">
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="mb-3">
+        {% for cat, msg in messages %}
+          <div class="alert alert-{{ 'danger' if cat == 'error' else cat }} alert-dismissible fade show" role="alert">
+            <i class="fa-solid fa-{% if cat == 'success' %}check-circle{% elif cat == 'danger' or cat == 'error' %}exclamation-triangle{% elif cat == 'warning' %}exclamation-circle{% else %}info-circle{% endif %}"></i>
+            {{ msg }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </div>
+
+  <footer class="text-center py-3" style="color:#aaa;font-size:12px;border-top:1px solid #f0f4f8;">
+    RSOMS &copy; {{ current_year }} — Restaurant Safety &amp; Operations Management System | NTCC Project
+  </footer>
+</div>
+
+{% else %}
+<!-- ══════════ NON-SIDEBAR LAYOUT ══════════ -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div style="position:fixed;top:16px;right:16px;z-index:9999;min-width:300px;">
+    {% for cat, msg in messages %}
+      <div class="alert alert-{{ 'danger' if cat == 'error' else cat }} alert-dismissible fade show shadow" role="alert">
+        {{ msg }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+{% block public_content %}{% endblock %}
+{% endif %}
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<!-- Custom JS -->
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% block extra_scripts %}{% endblock %}
+
+<script>
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('show');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('show');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,288 @@
+{% extends "base.html" %}
+{% block title %}Analytics{% endblock %}
+{% block page_title %}Analytics & Reports{% endblock %}
+
+{% block content %}
+<!-- Summary Cards Row -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3">
+    <div class="stat-card green">
+      <div class="stat-icon"><i class="fa-solid fa-shield-halved"></i></div>
+      <div class="stat-value">{{ restaurant.safety_score }}</div>
+      <div class="stat-label">Overall Safety Score</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="stat-card blue">
+      <div class="stat-icon"><i class="fa-solid fa-receipt"></i></div>
+      <div class="stat-value">{{ restaurant.orders|length }}</div>
+      <div class="stat-label">Total Orders</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="stat-card orange">
+      <div class="stat-icon"><i class="fa-solid fa-book-open"></i></div>
+      <div class="stat-value">{{ restaurant.menu_items|length }}</div>
+      <div class="stat-label">Menu Items</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="stat-card purple">
+      <div class="stat-icon"><i class="fa-solid fa-star"></i></div>
+      <div class="stat-value">{{ restaurant.average_rating }}</div>
+      <div class="stat-label">Average Rating</div>
+    </div>
+  </div>
+</div>
+
+<!-- Charts Grid -->
+<div class="row g-4">
+  <!-- Hygiene Score Trend -->
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="fa-solid fa-chart-line me-2" style="color:#27ae60;"></i>Hygiene Score Trend</span>
+        <span style="font-size:12px;color:#aaa;">Daily checklist completion over time</span>
+      </div>
+      <div class="card-body">
+        {% if score_labels != '[]' %}
+        <canvas id="scoreTrendChart" height="250"></canvas>
+        {% else %}
+        <div class="empty-state" style="padding:60px 20px;">
+          <i class="fa-solid fa-chart-line"></i>
+          <p>Submit daily checklists to see trend data.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Order Status Doughnut -->
+  <div class="col-lg-4">
+    <div class="card">
+      <div class="card-header">
+        <i class="fa-solid fa-chart-pie me-2" style="color:#e67e22;"></i>Order Status Breakdown
+      </div>
+      <div class="card-body">
+        {% if status_counts != '[0, 0, 0, 0]' %}
+        <canvas id="statusChart" height="200"></canvas>
+        {% else %}
+        <div class="empty-state" style="padding:40px 20px;">
+          <i class="fa-solid fa-receipt"></i>
+          <p>No orders recorded yet.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Revenue Bar Chart -->
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header">
+        <i class="fa-solid fa-indian-rupee-sign me-2" style="color:#8e44ad;"></i>Monthly Revenue (₹)
+      </div>
+      <div class="card-body">
+        {% if rev_labels != '[]' %}
+        <canvas id="revenueChart" height="220"></canvas>
+        {% else %}
+        <div class="empty-state" style="padding:40px 20px;">
+          <i class="fa-solid fa-money-bill"></i>
+          <p>Mark orders as paid to see revenue data.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Menu Category Doughnut -->
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header">
+        <i class="fa-solid fa-utensils me-2" style="color:#1abc9c;"></i>Menu by Category
+      </div>
+      <div class="card-body">
+        {% if cat_labels != '[]' %}
+        <canvas id="categoryChart" height="220"></canvas>
+        {% else %}
+        <div class="empty-state" style="padding:40px 20px;">
+          <i class="fa-solid fa-book-open"></i>
+          <p>Add menu items to see category breakdown.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Safety Score Gauge Card -->
+  <div class="col-lg-4">
+    <div class="card">
+      <div class="card-header">
+        <i class="fa-solid fa-gauge-high me-2" style="color:#e74c3c;"></i>Safety Badge Status
+      </div>
+      <div class="card-body text-center">
+        <div style="font-size:64px;font-weight:900;color:#27ae60;line-height:1;">{{ restaurant.safety_score }}</div>
+        <div style="color:#aaa;margin-bottom:16px;">out of 100</div>
+        {% if restaurant.badge_status == 'gold' %}
+          <span class="safety-badge gold"><i class="fa-solid fa-medal"></i> Gold Badge</span>
+        {% elif restaurant.badge_status == 'silver' %}
+          <span class="safety-badge silver"><i class="fa-solid fa-medal"></i> Silver Badge</span>
+        {% elif restaurant.badge_status == 'bronze' %}
+          <span class="safety-badge bronze"><i class="fa-solid fa-medal"></i> Bronze Badge</span>
+        {% elif restaurant.badge_status == 'red' %}
+          <span class="safety-badge red"><i class="fa-solid fa-triangle-exclamation"></i> At Risk</span>
+        {% else %}
+          <span class="safety-badge unrated">Not Rated</span>
+        {% endif %}
+        <div class="score-bar mt-3">
+          <div class="score-bar-fill" style="width:{{ restaurant.safety_score }}%"></div>
+        </div>
+        <div class="mt-3" style="font-size:12px;color:#aaa;text-align:left;">
+          <div class="d-flex justify-content-between"><span>Gold threshold</span><span class="fw-bold" style="color:#f9ca24;">90+</span></div>
+          <div class="d-flex justify-content-between"><span>Silver threshold</span><span class="fw-bold" style="color:#b2bec3;">75–89</span></div>
+          <div class="d-flex justify-content-between"><span>Bronze threshold</span><span class="fw-bold" style="color:#e17055;">60–74</span></div>
+          <div class="d-flex justify-content-between"><span>At Risk</span><span class="fw-bold" style="color:#e74c3c;">&lt;60</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top Stats Table -->
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-header"><i class="fa-solid fa-table me-2" style="color:#636e72;"></i>Quick Summary</div>
+      <div class="card-body p-0">
+        <table class="table-clean w-100">
+          <thead><tr><th>Metric</th><th>Value</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Safety Score</td>
+              <td>{{ restaurant.safety_score }} / 100</td>
+              <td>
+                <span style="background:{{ '#eafaf1' if restaurant.safety_score >= 75 else '#fdedec' }};color:{{ '#1e8449' if restaurant.safety_score >= 75 else '#922b21' }};padding:3px 10px;border-radius:10px;font-size:12px;font-weight:600;">
+                  {{ 'Good' if restaurant.safety_score >= 75 else 'Needs Improvement' }}
+                </span>
+              </td>
+            </tr>
+            <tr>
+              <td>FSSAI Status</td>
+              <td>{{ restaurant.fssai_status.replace('_', ' ').title() }}</td>
+              <td>
+                <span style="background:{{ '#eafaf1' if restaurant.fssai_status == 'valid' else '#fdedec' }};color:{{ '#1e8449' if restaurant.fssai_status == 'valid' else '#922b21' }};padding:3px 10px;border-radius:10px;font-size:12px;font-weight:600;">
+                  {{ 'Compliant' if restaurant.fssai_status == 'valid' else 'Action Needed' }}
+                </span>
+              </td>
+            </tr>
+            <tr>
+              <td>Total Orders</td>
+              <td>{{ restaurant.orders|length }}</td>
+              <td><span style="background:#eaf4fd;color:#1a5276;padding:3px 10px;border-radius:10px;font-size:12px;font-weight:600;">Recorded</span></td>
+            </tr>
+            <tr>
+              <td>Menu Items</td>
+              <td>{{ restaurant.menu_items|length }}</td>
+              <td><span style="background:#eaf4fd;color:#1a5276;padding:3px 10px;border-radius:10px;font-size:12px;font-weight:600;">{{ restaurant.menu_items|selectattr('available')|list|length }} Available</span></td>
+            </tr>
+            <tr>
+              <td>Staff Training Records</td>
+              <td>{{ restaurant.training_records|length }}</td>
+              <td><span style="background:#fef9e7;color:#9a7d0a;padding:3px 10px;border-radius:10px;font-size:12px;font-weight:600;">Tracked</span></td>
+            </tr>
+            <tr>
+              <td>Consumer Reviews</td>
+              <td>{{ restaurant.feedback_list|length }}</td>
+              <td><span style="background:{{ '#eafaf1' if restaurant.average_rating >= 4 else '#fef9e7' }};color:{{ '#1e8449' if restaurant.average_rating >= 4 else '#9a7d0a' }};padding:3px 10px;border-radius:10px;font-size:12px;font-weight:600;">Avg: {{ restaurant.average_rating }}★</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+const scoreLabels = {{ score_labels | safe }};
+const scoreData   = {{ score_data | safe }};
+const statusCounts = {{ status_counts | safe }};
+const statusLabels = {{ status_labels | safe }};
+const revLabels    = {{ rev_labels | safe }};
+const revData      = {{ rev_data | safe }};
+const catLabels    = {{ cat_labels | safe }};
+const catData      = {{ cat_data | safe }};
+
+const COLORS = ['#27ae60','#3498db','#e67e22','#e74c3c','#8e44ad','#1abc9c','#f39c12'];
+
+if (document.getElementById('scoreTrendChart') && scoreLabels.length) {
+  new Chart(document.getElementById('scoreTrendChart'), {
+    type: 'line',
+    data: {
+      labels: scoreLabels,
+      datasets: [{
+        label: 'Hygiene Score %',
+        data: scoreData,
+        borderColor: '#27ae60',
+        backgroundColor: 'rgba(39,174,96,0.08)',
+        borderWidth: 2.5,
+        pointBackgroundColor: '#27ae60',
+        pointRadius: 5,
+        fill: true,
+        tension: 0.4
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' }, grid: { color: '#f0f4f8' } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+}
+
+if (document.getElementById('statusChart')) {
+  new Chart(document.getElementById('statusChart'), {
+    type: 'doughnut',
+    data: {
+      labels: statusLabels.map(l => l.charAt(0).toUpperCase() + l.slice(1)),
+      datasets: [{ data: statusCounts, backgroundColor: ['#3498db','#e67e22','#27ae60','#bdc3c7'], borderWidth: 0 }]
+    },
+    options: { plugins: { legend: { position: 'bottom' } }, cutout: '65%' }
+  });
+}
+
+if (document.getElementById('revenueChart') && revLabels.length) {
+  new Chart(document.getElementById('revenueChart'), {
+    type: 'bar',
+    data: {
+      labels: revLabels,
+      datasets: [{
+        label: 'Revenue (₹)',
+        data: revData,
+        backgroundColor: 'rgba(142,68,173,0.7)',
+        borderRadius: 8,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true, grid: { color: '#f0f4f8' } }, x: { grid: { display: false } } }
+    }
+  });
+}
+
+if (document.getElementById('categoryChart') && catLabels.length) {
+  new Chart(document.getElementById('categoryChart'), {
+    type: 'doughnut',
+    data: {
+      labels: catLabels,
+      datasets: [{ data: catData, backgroundColor: COLORS, borderWidth: 0 }]
+    },
+    options: { plugins: { legend: { position: 'bottom' } }, cutout: '60%' }
+  });
+}
+</script>
+{% endblock %}

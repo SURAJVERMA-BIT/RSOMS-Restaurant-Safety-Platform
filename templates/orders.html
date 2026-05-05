@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+{% block title %}Orders{% endblock %}
+{% block page_title %}Order Management{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <!-- Status Filter Tabs -->
+  <div style="background:white;border-radius:10px;padding:4px;box-shadow:0 1px 6px rgba(0,0,0,0.06);display:flex;gap:2px;">
+    {% for s in ['all','placed','preparing','ready','served'] %}
+    <a href="{{ url_for('orders', status=s) }}"
+       style="padding:7px 16px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;
+              background:{{ '#27ae60' if status_filter == s else 'transparent' }};
+              color:{{ 'white' if status_filter == s else '#636e72' }};">
+      {{ s.title() }}
+    </a>
+    {% endfor %}
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{{ url_for('order_kds') }}" class="btn btn-sm" style="background:#f5eef8;color:#8e44ad;border:none;font-weight:600;border-radius:8px;padding:8px 16px;">
+      <i class="fa-solid fa-kitchen-set me-1"></i> KDS View
+    </a>
+    <button class="btn-primary-custom" data-bs-toggle="modal" data-bs-target="#newOrderModal">
+      <i class="fa-solid fa-plus"></i> New Order
+    </button>
+  </div>
+</div>
+
+{% if orders %}
+<div class="row g-3">
+  {% for order in orders %}
+  <div class="col-12">
+    <div class="card order-card {{ order.status }}">
+      <div class="card-body p-3">
+        <div class="row align-items-center g-2">
+          <div class="col-auto">
+            <div style="width:44px;height:44px;background:#f0f4f8;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:800;color:#27ae60;font-size:16px;">
+              #{{ order.id }}
+            </div>
+          </div>
+          <div class="col">
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+              <strong>{{ order.customer_name }}</strong>
+              {% if order.table_number %}<span style="background:#f0f4f8;color:#636e72;font-size:12px;padding:2px 8px;border-radius:6px;">Table {{ order.table_number }}</span>{% endif %}
+              {% if order.customer_phone %}<span style="color:#aaa;font-size:12px;"><i class="fa-solid fa-phone fa-xs me-1"></i>{{ order.customer_phone }}</span>{% endif %}
+            </div>
+            <div class="mt-1 d-flex gap-3 flex-wrap" style="font-size:12px;color:#aaa;">
+              <span><i class="fa-solid fa-clock me-1"></i>{{ order.created_at.strftime('%d %b, %H:%M') }}</span>
+              <span><i class="fa-solid fa-indian-rupee-sign me-1"></i>₹{{ order.total_amount }}</span>
+              {% if order.notes %}<span><i class="fa-solid fa-note-sticky me-1"></i>{{ order.notes[:40] }}</span>{% endif %}
+            </div>
+            <!-- Items list -->
+            <div class="mt-1" style="font-size:12px;color:#636e72;">
+              {% for oi in order.items %}
+                <span style="background:#f8fafc;padding:2px 8px;border-radius:5px;margin-right:4px;border:1px solid #edf2f7;">
+                  {{ oi.menu_item.name }} x{{ oi.quantity }}
+                </span>
+              {% endfor %}
+            </div>
+          </div>
+          <div class="col-auto d-flex align-items-center gap-2 flex-wrap">
+            <span class="status-pill {{ order.status }}">{{ order.status.title() }}</span>
+
+            <!-- Payment status -->
+            {% if order.payment_status == 'paid' %}
+              <span style="background:#d5f5e3;color:#1e8449;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;">
+                <i class="fa-solid fa-check me-1"></i>Paid
+              </span>
+            {% else %}
+              <form method="POST" action="{{ url_for('order_payment', order_id=order.id) }}" class="d-inline">
+                {{ form.hidden_tag() }}
+                <button type="submit" style="background:#fef9e7;color:#9a7d0a;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;border:none;cursor:pointer;">
+                  <i class="fa-solid fa-money-bill me-1"></i>Mark Paid
+                </button>
+              </form>
+            {% endif %}
+
+            <!-- Status advance -->
+            {% if order.status != 'served' %}
+            <form method="POST" action="{{ url_for('order_status', order_id=order.id) }}" class="d-inline">
+              {{ form.hidden_tag() }}
+              <input type="hidden" name="status" value="{{ order.next_status() }}">
+              <button type="submit" class="btn btn-sm" style="background:#eafaf1;color:#1e8449;border:none;font-size:12px;font-weight:600;border-radius:8px;padding:6px 14px;">
+                → {{ order.next_status().title() }}
+              </button>
+            </form>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card">
+  <div class="card-body">
+    <div class="empty-state">
+      <i class="fa-solid fa-receipt"></i>
+      <h5>No orders {{ 'with status: ' + status_filter if status_filter != 'all' else 'yet' }}</h5>
+      <p>Create your first order using the button above.</p>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- ══ NEW ORDER MODAL ══ -->
+<div class="modal fade" id="newOrderModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold"><i class="fa-solid fa-plus me-2 text-success"></i>New Order</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="POST" action="{{ url_for('order_create') }}" novalidate>
+        {{ form.hidden_tag() }}
+        <div class="modal-body">
+          <div class="row g-3 mb-3">
+            <div class="col-md-4">
+              <label class="form-label">Customer Name *</label>
+              {{ form.customer_name(class="form-control", placeholder="Customer name") }}
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Phone</label>
+              {{ form.customer_phone(class="form-control", placeholder="+91 98765 43210") }}
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Table Number</label>
+              {{ form.table_number(class="form-control", placeholder="e.g. T1, T2") }}
+            </div>
+            <div class="col-12">
+              <label class="form-label">Special Notes</label>
+              {{ form.notes(class="form-control", rows=1, placeholder="Allergies, spice level, etc.") }}
+            </div>
+          </div>
+
+          <h6 class="fw-bold mb-2"><i class="fa-solid fa-utensils me-2" style="color:#e67e22;"></i>Select Items</h6>
+          <div style="max-height:300px;overflow-y:auto;border:1px solid #f0f4f8;border-radius:10px;">
+            {% for item in menu_items %}
+            <div class="d-flex align-items-center justify-content-between p-3" style="border-bottom:1px solid #f8fafc;">
+              <div class="d-flex align-items-center gap-2">
+                <span class="veg-dot {{ 'veg' if item.is_veg else 'nonveg' }}"></span>
+                <div>
+                  <div style="font-weight:600;font-size:14px;">{{ item.name }}</div>
+                  <div style="font-size:12px;color:#aaa;">{{ item.category }}</div>
+                </div>
+              </div>
+              <div class="d-flex align-items-center gap-3">
+                <span style="font-weight:700;color:#27ae60;">₹{{ item.price }}</span>
+                <div class="d-flex align-items-center gap-1">
+                  <button type="button" class="qty-btn" onclick="changeQty(this, -1)" style="width:26px;height:26px;border-radius:50%;border:1.5px solid #ddd;background:white;font-weight:700;font-size:14px;cursor:pointer;">−</button>
+                  <input type="number" name="quantities[]" class="qty-input" value="0" min="0" data-price="{{ item.price }}"
+                         style="width:40px;text-align:center;border:1.5px solid #ddd;border-radius:6px;font-weight:600;padding:2px;">
+                  <input type="hidden" name="item_ids[]" value="{{ item.id }}">
+                  <button type="button" class="qty-btn" onclick="changeQty(this, 1)" style="width:26px;height:26px;border-radius:50%;border:1.5px solid #ddd;background:white;font-weight:700;font-size:14px;cursor:pointer;">+</button>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+
+          <div class="mt-3 p-3 d-flex justify-content-between align-items-center" style="background:#f0f9f4;border-radius:10px;">
+            <span class="fw-bold">Order Total:</span>
+            <span style="font-size:22px;font-weight:900;color:#27ae60;">₹<span id="orderTotal">0.00</span></span>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn-primary-custom">
+            <i class="fa-solid fa-check"></i> Place Order
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function changeQty(btn, delta) {
+  const row = btn.closest('.d-flex');
+  const input = row.querySelector('.qty-input');
+  let val = parseInt(input.value) + delta;
+  if (val < 0) val = 0;
+  input.value = val;
+  updateTotal();
+}
+function updateTotal() {
+  let total = 0;
+  document.querySelectorAll('.qty-input').forEach(inp => {
+    total += parseFloat(inp.dataset.price) * parseInt(inp.value || 0);
+  });
+  document.getElementById('orderTotal').textContent = total.toFixed(2);
+}
+document.querySelectorAll('.qty-input').forEach(inp => {
+  inp.addEventListener('input', updateTotal);
+});
+</script>
+{% endblock %}

@@ -1,0 +1,62 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Database (SQLite — regenerate locally)
+*.db
+*.sqlite
+*.sqlite3
+
+# Uploads (user files — don't commit)
+static/uploads/*
+!static/uploads/.gitkeep
+
+# Environment / secrets
+.env
+.env.local
+*.pem
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Flask
+instance/
+.webassets-cache
+
+# Logs
+*.log
+
+# Manual cleanup folder (never commit)
+folder-ill-delete-manually/
