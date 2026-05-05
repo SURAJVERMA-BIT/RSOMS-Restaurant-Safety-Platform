@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block title %}Kitchen Display{% endblock %}
+{% block page_title %}Kitchen Display System (KDS){% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div class="d-flex align-items-center gap-2">
+    <span class="pulse-dot"></span>
+    <small class="text-muted">Auto-refreshes every 30 seconds</small>
+  </div>
+  <a href="{{ url_for('orders') }}" class="btn btn-sm" style="background:#f0f4f8;color:#636e72;border:none;border-radius:8px;">
+    <i class="fa-solid fa-list me-1"></i> All Orders
+  </a>
+</div>
+
+<div class="row g-4">
+  <!-- Active Orders Column -->
+  <div class="col-lg-8">
+    <h6 class="fw-bold mb-3" style="color:#e67e22;">
+      <i class="fa-solid fa-fire-burner me-2"></i>Active — Cooking
+      <span style="background:#fef5e7;color:#e67e22;border-radius:20px;padding:2px 10px;font-size:12px;margin-left:8px;">{{ active|length }}</span>
+    </h6>
+    {% if active %}
+    <div class="row g-3">
+      {% for order in active %}
+      <div class="col-md-6">
+        <div class="order-card {{ order.status }}">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div>
+              <span style="font-size:20px;font-weight:900;color:#27ae60;">#{{ order.id }}</span>
+              <span class="status-pill {{ order.status }} ms-2">{{ order.status.title() }}</span>
+            </div>
+            <small style="color:#aaa;">{{ order.created_at.strftime('%H:%M') }}</small>
+          </div>
+          <div style="font-weight:600;margin-bottom:6px;">{{ order.customer_name }}
+            {% if order.table_number %}<span style="font-size:12px;color:#aaa;"> · Table {{ order.table_number }}</span>{% endif %}
+          </div>
+          <div class="mb-3">
+            {% for oi in order.items %}
+            <div class="d-flex justify-content-between" style="font-size:14px;padding:4px 0;border-bottom:1px dashed #edf2f7;">
+              <span>{{ oi.menu_item.name }}</span>
+              <span class="fw-bold">×{{ oi.quantity }}</span>
+            </div>
+            {% endfor %}
+          </div>
+          {% if order.notes %}
+          <div style="font-size:12px;background:#fffde7;border-radius:6px;padding:6px 10px;margin-bottom:8px;color:#7d6608;">
+            <i class="fa-solid fa-note-sticky me-1"></i>{{ order.notes }}
+          </div>
+          {% endif %}
+          <!-- Advance status button -->
+          <form method="POST" action="{{ url_for('order_status', order_id=order.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="status" value="{{ order.next_status() }}">
+            <button type="submit" class="btn w-100" style="border:none;border-radius:8px;font-weight:700;padding:8px;color:white;
+              background:{% if order.status == 'preparing' %}#27ae60{% else %}#e67e22{% endif %};">
+              Mark as {{ order.next_status().title() }} →
+            </button>
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="card">
+      <div class="card-body empty-state" style="padding:40px;">
+        <i class="fa-solid fa-check-circle" style="color:#27ae60;opacity:0.4;font-size:40px;"></i>
+        <h6 style="margin-top:12px;color:#aaa;">No active orders right now!</h6>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Ready Column -->
+  <div class="col-lg-4">
+    <h6 class="fw-bold mb-3" style="color:#27ae60;">
+      <i class="fa-solid fa-bell me-2"></i>Ready to Serve
+      <span style="background:#eafaf1;color:#1e8449;border-radius:20px;padding:2px 10px;font-size:12px;margin-left:8px;">{{ ready|length }}</span>
+    </h6>
+    {% if ready %}
+      {% for order in ready %}
+      <div class="order-card ready mb-3">
+        <div class="d-flex justify-content-between mb-2">
+          <span style="font-size:18px;font-weight:900;color:#27ae60;">#{{ order.id }}</span>
+          <span class="status-pill ready">Ready</span>
+        </div>
+        <div class="fw-bold mb-1">{{ order.customer_name }}
+          {% if order.table_number %}<span style="font-size:12px;color:#aaa;"> · T{{ order.table_number }}</span>{% endif %}
+        </div>
+        <div class="mb-2" style="font-size:13px;color:#636e72;">
+          {% for oi in order.items %}{{ oi.menu_item.name }}×{{ oi.quantity }}{% if not loop.last %}, {% endif %}{% endfor %}
+        </div>
+        <form method="POST" action="{{ url_for('order_status', order_id=order.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="hidden" name="status" value="served">
+          <button type="submit" class="btn w-100" style="background:#27ae60;color:white;border:none;border-radius:8px;font-weight:700;padding:7px;">
+            <i class="fa-solid fa-check me-1"></i> Mark Served
+          </button>
+        </form>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="card">
+        <div class="card-body text-center py-4">
+          <i class="fa-solid fa-bell-slash fa-2x" style="color:#aaa;opacity:0.4;"></i>
+          <p style="color:#aaa;font-size:13px;margin-top:8px;">None ready yet</p>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Auto-refresh every 30 seconds
+setTimeout(() => location.reload(), 30000);
+let countdown = 30;
+setInterval(() => {
+  countdown--;
+  const el = document.querySelector('.text-muted small, small.text-muted');
+  if (el && countdown > 0) el.textContent = `Auto-refreshes in ${countdown}s`;
+}, 1000);
+</script>
+{% endblock %}

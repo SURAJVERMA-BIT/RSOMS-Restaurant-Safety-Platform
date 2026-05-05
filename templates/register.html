@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+{% block title %}Register{% endblock %}
+
+{% block public_content %}
+<div style="min-height:100vh;background:linear-gradient(135deg,#1a252f 0%,#2c3e50 100%);display:flex;align-items:center;justify-content:center;padding:20px;">
+  <div style="width:100%;max-width:480px;">
+    <div class="text-center mb-4">
+      <a href="{{ url_for('index') }}" style="text-decoration:none;">
+        <div style="width:60px;height:60px;background:#27ae60;border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
+          <i class="fa-solid fa-utensils fa-xl" style="color:white;"></i>
+        </div>
+        <h4 style="color:white;font-weight:800;margin:0;">RSOMS</h4>
+        <small style="color:rgba(255,255,255,0.5);">Restaurant Safety & Operations</small>
+      </a>
+    </div>
+
+    <div style="background:white;border-radius:20px;padding:36px;box-shadow:0 24px 64px rgba(0,0,0,0.3);">
+      <h5 style="font-weight:700;margin-bottom:4px;">Create your account</h5>
+      <p style="color:#636e72;font-size:14px;margin-bottom:28px;">Start managing your restaurant safely today</p>
+
+      <form method="POST" action="{{ url_for('register') }}" novalidate>
+        {{ form.hidden_tag() }}
+
+        <div class="mb-3">
+          <label class="form-label">{{ form.username.label.text }}</label>
+          {{ form.username(class="form-control", placeholder="Your full name") }}
+          {% if form.username.errors %}
+            <div class="text-danger" style="font-size:12px;margin-top:4px;">{{ form.username.errors[0] }}</div>
+          {% endif %}
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">{{ form.email.label.text }}</label>
+          {{ form.email(class="form-control", placeholder="you@email.com") }}
+          {% if form.email.errors %}
+            <div class="text-danger" style="font-size:12px;margin-top:4px;">{{ form.email.errors[0] }}</div>
+          {% endif %}
+        </div>
+
+        <!-- Role selector cards -->
+        <div class="mb-3">
+          <label class="form-label">Register As</label>
+          <div class="row g-2">
+            <div class="col-4">
+              <input type="radio" name="role" id="role_admin" value="admin" class="d-none role-radio" checked>
+              <label for="role_admin" class="role-card" onclick="selectRole(this)">
+                <i class="fa-solid fa-user-tie fa-lg" style="color:#27ae60;"></i>
+                <div style="font-size:12px;font-weight:700;margin-top:6px;">Owner</div>
+                <div style="font-size:10px;color:#aaa;">Admin access</div>
+              </label>
+            </div>
+            <div class="col-4">
+              <input type="radio" name="role" id="role_staff" value="staff" class="d-none role-radio">
+              <label for="role_staff" class="role-card" onclick="selectRole(this)">
+                <i class="fa-solid fa-chef-hat fa-lg" style="color:#3498db;"></i>
+                <div style="font-size:12px;font-weight:700;margin-top:6px;">Staff</div>
+                <div style="font-size:10px;color:#aaa;">Kitchen access</div>
+              </label>
+            </div>
+            <div class="col-4">
+              <input type="radio" name="role" id="role_consumer" value="consumer" class="d-none role-radio">
+              <label for="role_consumer" class="role-card" onclick="selectRole(this)">
+                <i class="fa-solid fa-user fa-lg" style="color:#e67e22;"></i>
+                <div style="font-size:12px;font-weight:700;margin-top:6px;">Consumer</div>
+                <div style="font-size:10px;color:#aaa;">Browse only</div>
+              </label>
+            </div>
+          </div>
+          <!-- Hidden select for Flask-WTF -->
+          <div style="display:none;">{{ form.role(id="roleSelect") }}</div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">{{ form.password.label.text }}</label>
+          <div style="position:relative;">
+            {{ form.password(class="form-control", placeholder="Min. 6 characters", id="regPassword") }}
+            <button type="button" onclick="togglePass('regPassword', this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:#636e72;cursor:pointer;">
+              <i class="fa-regular fa-eye"></i>
+            </button>
+          </div>
+          {% if form.password.errors %}
+            <div class="text-danger" style="font-size:12px;margin-top:4px;">{{ form.password.errors[0] }}</div>
+          {% endif %}
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label">{{ form.confirm.label.text }}</label>
+          {{ form.confirm(class="form-control", placeholder="Repeat password") }}
+          {% if form.confirm.errors %}
+            <div class="text-danger" style="font-size:12px;margin-top:4px;">{{ form.confirm.errors[0] }}</div>
+          {% endif %}
+        </div>
+
+        <button type="submit" class="btn w-100" style="background:#27ae60;color:white;border:none;padding:12px;border-radius:10px;font-weight:700;font-size:15px;">
+          <i class="fa-solid fa-user-plus me-2"></i>Create Account
+        </button>
+      </form>
+
+      <div class="text-center mt-4" style="font-size:14px;color:#636e72;">
+        Already registered?
+        <a href="{{ url_for('login') }}" style="color:#27ae60;font-weight:600;">Sign in</a>
+      </div>
+    </div>
+
+    <div class="text-center mt-3">
+      <a href="{{ url_for('index') }}" style="color:rgba(255,255,255,0.4);font-size:12px;">← Back to Home</a>
+    </div>
+  </div>
+</div>
+
+<style>
+.role-card {
+  display: block;
+  text-align: center;
+  border: 2px solid #e8ecf0;
+  border-radius: 12px;
+  padding: 14px 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #fafafa;
+}
+.role-card:hover { border-color: #27ae60; background: #f0fff4; }
+.role-card.selected { border-color: #27ae60; background: #f0fff4; box-shadow: 0 0 0 3px rgba(39,174,96,0.15); }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function togglePass(id, btn) {
+  const input = document.getElementById(id);
+  const icon = btn.querySelector('i');
+  input.type = input.type === 'password' ? 'text' : 'password';
+  icon.className = input.type === 'password' ? 'fa-regular fa-eye' : 'fa-regular fa-eye-slash';
+}
+function selectRole(label) {
+  document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
+  label.classList.add('selected');
+  const radio = label.previousElementSibling;
+  radio.checked = true;
+  const select = document.getElementById('roleSelect');
+  select.value = radio.value;
+}
+// Init first card as selected
+document.addEventListener('DOMContentLoaded', () => {
+  const first = document.querySelector('.role-card');
+  if (first) first.classList.add('selected');
+  document.getElementById('roleSelect').value = 'admin';
+});
+</script>
+{% endblock %}

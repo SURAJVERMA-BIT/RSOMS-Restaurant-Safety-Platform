@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+{% block title %}Restaurant Profile{% endblock %}
+{% block page_title %}Restaurant Profile{% endblock %}
+
+{% block content %}
+{% set fstatus = restaurant.fssai_status %}
+
+<!-- FSSAI Banner -->
+<div class="fssai-banner {{ fstatus }} mb-4">
+  <i class="fa-solid fa-{% if fstatus == 'valid' %}circle-check{% elif fstatus == 'not_uploaded' %}file-circle-xmark{% else %}triangle-exclamation{% endif %} fa-lg"></i>
+  <div>
+    {% if fstatus == 'valid' %}
+      <strong>FSSAI Certificate Valid</strong> — Expires on {{ restaurant.fssai_expiry_date.strftime('%d %b %Y') }} ({{ restaurant.fssai_days_to_expiry }} days remaining)
+    {% elif fstatus == 'not_uploaded' %}
+      <strong>No FSSAI Certificate uploaded.</strong> Upload your certificate below.
+    {% elif fstatus == 'expired' %}
+      <strong>FSSAI Certificate EXPIRED!</strong> Renew immediately.
+    {% elif fstatus == 'critical' %}
+      <strong>Critical:</strong> Expires in {{ restaurant.fssai_days_to_expiry }} days!
+    {% elif fstatus == 'warning' %}
+      <strong>Warning:</strong> Expires in {{ restaurant.fssai_days_to_expiry }} days.
+    {% elif fstatus == 'notice' %}
+      <strong>Notice:</strong> Expires in {{ restaurant.fssai_days_to_expiry }} days.
+    {% endif %}
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- Profile Form -->
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-header">
+        <i class="fa-solid fa-store me-2 text-success"></i>Restaurant Details
+      </div>
+      <div class="card-body">
+        <form method="POST" action="{{ url_for('restaurant_profile') }}" novalidate>
+          {{ form.hidden_tag() }}
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label">{{ form.name.label.text }} *</label>
+              {{ form.name(class="form-control", placeholder="e.g. Spice Garden") }}
+              {% if form.name.errors %}<div class="text-danger" style="font-size:12px;">{{ form.name.errors[0] }}</div>{% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">{{ form.cuisine.label.text }}</label>
+              {{ form.cuisine(class="form-control", placeholder="e.g. North Indian, Chinese") }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">{{ form.contact.label.text }}</label>
+              {{ form.contact(class="form-control", placeholder="+91 98765 43210") }}
+            </div>
+            <div class="col-12">
+              <label class="form-label">{{ form.address.label.text }}</label>
+              {{ form.address(class="form-control", rows=2, placeholder="Full address with city and pincode") }}
+            </div>
+            <div class="col-12">
+              <label class="form-label">{{ form.description.label.text }}</label>
+              {{ form.description(class="form-control", rows=2, placeholder="Brief description of your restaurant") }}
+            </div>
+
+            <div class="col-12"><div class="divider"></div><h6 class="fw-bold"><i class="fa-solid fa-file-certificate me-2" style="color:#27ae60;"></i>FSSAI Details</h6></div>
+
+            <div class="col-12">
+              <label class="form-label">{{ form.fssai_number.label.text }}</label>
+              {{ form.fssai_number(class="form-control", placeholder="14-digit FSSAI license number") }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">{{ form.fssai_issue_date.label.text }}</label>
+              {{ form.fssai_issue_date(class="form-control") }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">{{ form.fssai_expiry_date.label.text }}</label>
+              {{ form.fssai_expiry_date(class="form-control") }}
+            </div>
+
+            <div class="col-12">
+              <div class="form-check form-switch">
+                {{ form.is_public(class="form-check-input", role="switch") }}
+                <label class="form-check-label" for="{{ form.is_public.id }}">
+                  Make this restaurant visible on the public listing page
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 d-flex gap-2">
+            <button type="submit" class="btn-primary-custom">
+              <i class="fa-solid fa-floppy-disk"></i> Save Profile
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Column: Upload + Status -->
+  <div class="col-lg-4">
+    <!-- FSSAI Upload Card -->
+    <div class="card mb-3">
+      <div class="card-header"><i class="fa-solid fa-upload me-2" style="color:#3498db;"></i>Upload FSSAI Certificate</div>
+      <div class="card-body">
+        <form method="POST" action="{{ url_for('fssai_upload') }}" enctype="multipart/form-data">
+          {{ upload_form.hidden_tag() }}
+          <div class="mb-3">
+            {{ upload_form.certificate(class="form-control") }}
+            <small class="text-muted">PDF, JPG or PNG — max 5MB</small>
+          </div>
+          <button type="submit" class="btn w-100" style="background:#3498db;color:white;border:none;border-radius:8px;padding:10px;font-weight:600;">
+            <i class="fa-solid fa-cloud-arrow-up me-2"></i>Upload Certificate
+          </button>
+        </form>
+
+        {% if restaurant.fssai_cert_path %}
+        <div class="mt-3 p-3 text-center" style="background:#eafaf1;border-radius:10px;border:1px solid #a9dfbf;">
+          <i class="fa-solid fa-file-check fa-2x" style="color:#27ae60;"></i>
+          <div style="font-size:13px;font-weight:600;color:#1e8449;margin-top:6px;">Certificate Uploaded</div>
+          <a href="{{ url_for('static', filename='uploads/' + restaurant.fssai_cert_path) }}" target="_blank"
+             class="btn btn-sm mt-2" style="background:#27ae60;color:white;border:none;border-radius:6px;">
+            <i class="fa-solid fa-eye me-1"></i> View Certificate
+          </a>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Safety Score Card -->
+    <div class="card mb-3">
+      <div class="card-header"><i class="fa-solid fa-shield-halved me-2 text-success"></i>Current Safety Status</div>
+      <div class="card-body text-center">
+        <div style="font-size:48px;font-weight:900;color:#27ae60;">{{ restaurant.safety_score }}</div>
+        <div style="color:#aaa;font-size:13px;margin-bottom:12px;">out of 100</div>
+        {% if restaurant.badge_status == 'gold' %}
+          <span class="safety-badge gold"><i class="fa-solid fa-medal"></i> Gold Badge</span>
+        {% elif restaurant.badge_status == 'silver' %}
+          <span class="safety-badge silver"><i class="fa-solid fa-medal"></i> Silver Badge</span>
+        {% elif restaurant.badge_status == 'bronze' %}
+          <span class="safety-badge bronze"><i class="fa-solid fa-medal"></i> Bronze Badge</span>
+        {% elif restaurant.badge_status == 'red' %}
+          <span class="safety-badge red"><i class="fa-solid fa-triangle-exclamation"></i> At Risk</span>
+        {% else %}
+          <span class="safety-badge unrated">Not Rated</span>
+        {% endif %}
+        <div class="score-bar mt-3">
+          <div class="score-bar-fill" style="width:{{ restaurant.safety_score }}%"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Public Page Link -->
+    <div class="card">
+      <div class="card-body text-center">
+        <i class="fa-solid fa-eye fa-2x mb-2" style="color:#636e72;opacity:0.5;"></i>
+        <p style="font-size:13px;color:#636e72;margin-bottom:12px;">See how your restaurant appears to the public</p>
+        <a href="{{ url_for('public_restaurant', restaurant_id=restaurant.id) }}" target="_blank" class="btn w-100" style="border:2px solid #27ae60;color:#27ae60;border-radius:8px;font-weight:600;">
+          <i class="fa-solid fa-arrow-up-right-from-square me-2"></i> View Public Page
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
