@@ -152,6 +152,7 @@ class MenuItem(db.Model):
     category = db.Column(db.String(100), default='Main Course')
     available = db.Column(db.Boolean, default=True)
     is_veg = db.Column(db.Boolean, default=True)
+    image_path = db.Column(db.String(255), default='')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     order_items = db.relationship('OrderItem', backref='menu_item', lazy=True)
@@ -239,6 +240,8 @@ class HygieneChecklist(db.Model):
     completed_count = db.Column(db.Integer, default=0)
     total_count = db.Column(db.Integer, default=8)
     notes = db.Column(db.Text, default='')
+    kitchen_photo = db.Column(db.String(255), default='')
+    restaurant_photo = db.Column(db.String(255), default='')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     staff = db.relationship('User', foreign_keys=[staff_id])

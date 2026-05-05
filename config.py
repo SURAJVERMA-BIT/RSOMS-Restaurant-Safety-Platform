@@ -12,7 +12,7 @@ class Config:
     WTF_CSRF_ENABLED = True
     UPLOAD_FOLDER = os.path.join(BASE_DIR, 'static', 'uploads')
     MAX_CONTENT_LENGTH = 5 * 1024 * 1024  # 5 MB limit
-    ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg'}
+    ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg', 'webp', 'gif', 'bmp'}
     PERMANENT_SESSION_LIFETIME = timedelta(hours=8)
 
 

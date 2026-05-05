@@ -41,7 +41,7 @@ class RestaurantProfileForm(FlaskForm):
 
 class FSSAIUploadForm(FlaskForm):
     certificate = FileField('FSSAI Certificate', validators=[
-        FileAllowed(['pdf', 'png', 'jpg', 'jpeg'], 'PDF or image files only!')
+        FileAllowed(['pdf', 'png', 'jpg', 'jpeg', 'webp', 'gif', 'bmp'], 'PDF or image files only!')
     ])
     submit = SubmitField('Upload Certificate')
 
@@ -57,6 +57,9 @@ class MenuItemForm(FlaskForm):
     ])
     is_veg = BooleanField('Vegetarian')
     available = BooleanField('Available')
+    image = FileField('Item Image', validators=[
+        FileAllowed(['jpg', 'jpeg', 'png', 'webp', 'gif', 'bmp'], 'Images only (JPG, PNG, WEBP, GIF, BMP)!')
+    ])
     submit = SubmitField('Save Item')
 
 
@@ -71,6 +74,12 @@ class OrderForm(FlaskForm):
 class HygieneChecklistForm(FlaskForm):
     checklist_type = HiddenField('Type', default='daily')
     notes = TextAreaField('Additional Notes', validators=[Optional()])
+    kitchen_photo = FileField('Kitchen Photo', validators=[
+        FileAllowed(['jpg', 'jpeg', 'png', 'webp', 'gif', 'bmp'], 'Images only!')
+    ])
+    restaurant_photo = FileField('Restaurant Photo', validators=[
+        FileAllowed(['jpg', 'jpeg', 'png', 'webp', 'gif', 'bmp'], 'Images only!')
+    ])
     submit = SubmitField('Submit Checklist')
 
 

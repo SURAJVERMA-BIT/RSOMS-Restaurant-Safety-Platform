@@ -217,7 +217,7 @@
             <h6 class="fw-bold mb-3">Safety Summary</h6>
             {% set items_summary = [
               ('Safety Score', restaurant.safety_score|string + '/100', '#27ae60'),
-              ('FSSAI Status', restaurant.fssai_status.replace(\"_\",\" \").title(), '#3498db'),
+              ('FSSAI Status', restaurant.fssai_status.replace('_',' ').title(), '#3498db'),
               ('Safety Badge', restaurant.badge_status.title(), '#e67e22'),
               ('Avg Rating', restaurant.average_rating|string + ' / 5', '#8e44ad'),
               ('Total Reviews', restaurant.feedback_list|length|string, '#1abc9c'),

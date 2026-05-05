@@ -52,31 +52,31 @@
         <!-- Stats visual -->
         <div class="row g-3">
           <div class="col-6">
-            <div style="background:rgba(255,255,255,0.08);border-radius:16px;padding:24px;text-align:center;border:1px solid rgba(255,255,255,0.12);">
-              <div style="font-size:40px;font-weight:900;color:#2ecc71;">40%</div>
-              <div style="color:rgba(255,255,255,0.7);font-size:13px;margin-top:4px;">Restaurants Unverified on Delivery Apps</div>
-              <div style="color:rgba(255,255,255,0.4);font-size:11px;">Source: FSSAI India</div>
+            <div class="hero-stat-card">
+              <div style="font-size:36px;font-weight:900;color:#2ecc71;">40%</div>
+              <div style="color:rgba(255,255,255,0.7);font-size:13px;margin-top:8px;line-height:1.4;">Restaurants Unverified on Delivery Apps</div>
+              <div style="color:rgba(255,255,255,0.4);font-size:11px;margin-top:4px;">Source: FSSAI India</div>
             </div>
           </div>
           <div class="col-6">
-            <div style="background:rgba(255,255,255,0.08);border-radius:16px;padding:24px;text-align:center;border:1px solid rgba(255,255,255,0.12);">
-              <div style="font-size:40px;font-weight:900;color:#e67e22;">74%</div>
-              <div style="color:rgba(255,255,255,0.7);font-size:13px;margin-top:4px;">Mumbai Restaurants Had Safety Violations</div>
-              <div style="color:rgba(255,255,255,0.4);font-size:11px;">Source: FDA 2018</div>
+            <div class="hero-stat-card">
+              <div style="font-size:36px;font-weight:900;color:#e67e22;">74%</div>
+              <div style="color:rgba(255,255,255,0.7);font-size:13px;margin-top:8px;line-height:1.4;">Mumbai Restaurants Had Safety Violations</div>
+              <div style="color:rgba(255,255,255,0.4);font-size:11px;margin-top:4px;">Source: FDA 2018</div>
             </div>
           </div>
           <div class="col-6">
-            <div style="background:rgba(255,255,255,0.08);border-radius:16px;padding:24px;text-align:center;border:1px solid rgba(255,255,255,0.12);">
-              <div style="font-size:40px;font-weight:900;color:#3498db;">1,955</div>
-              <div style="color:rgba(255,255,255,0.7);font-size:13px;margin-top:4px;">Food Safety Complaints on Zomato/Swiggy</div>
-              <div style="color:rgba(255,255,255,0.4);font-size:11px;">Source: National Consumer Helpline</div>
+            <div class="hero-stat-card">
+              <div style="font-size:36px;font-weight:900;color:#3498db;">1,955</div>
+              <div style="color:rgba(255,255,255,0.7);font-size:13px;margin-top:8px;line-height:1.4;">Food Safety Complaints on Zomato/Swiggy</div>
+              <div style="color:rgba(255,255,255,0.4);font-size:11px;margin-top:4px;">Source: National Consumer Helpline</div>
             </div>
           </div>
           <div class="col-6">
-            <div style="background:rgba(39,174,96,0.2);border-radius:16px;padding:24px;text-align:center;border:1px solid rgba(39,174,96,0.4);">
-              <div style="font-size:40px;font-weight:900;color:#2ecc71;">0</div>
-              <div style="color:rgba(255,255,255,0.7);font-size:13px;margin-top:4px;">of 10 Apps Have Safety Compliance Module</div>
-              <div style="color:rgba(255,255,255,0.4);font-size:11px;">Gap we solve →</div>
+            <div class="hero-stat-card highlight">
+              <div style="font-size:36px;font-weight:900;color:#2ecc71;">0</div>
+              <div style="color:rgba(255,255,255,0.7);font-size:13px;margin-top:8px;line-height:1.4;">of 10 Apps Have Safety Compliance Module</div>
+              <div style="color:rgba(255,255,255,0.5);font-size:11px;margin-top:4px;font-weight:600;">Gap we solve &rarr;</div>
             </div>
           </div>
         </div>
@@ -86,31 +86,31 @@
 </section>
 
 <!-- ══ FEATURES ══ -->
-<section style="background:white;padding:80px 0;">
-  <div class="container">
+<section class="features-section">
+  <div class="container position-relative" style="z-index:1;">
     <div class="text-center mb-5">
-      <span style="color:#27ae60;font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:1px;">What Makes Us Different</span>
-      <h2 style="font-size:36px;font-weight:800;margin-top:8px;">All 10 Gaps. One Solution.</h2>
+      <span style="color:#27ae60;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:2px;">What Makes Us Different</span>
+      <h2 style="font-size:40px;font-weight:800;margin-top:12px;letter-spacing:-0.5px;color:#1a202c;">All 10 Gaps. One Solution.</h2>
+      <p style="color:#718096;max-width:480px;margin:12px auto 0;font-size:15px;">Everything your restaurant needs to stay compliant, transparent, and trusted by consumers.</p>
     </div>
     <div class="row g-4">
       {% set features = [
-        ('fa-file-certificate','#27ae60','FSSAI Certificate Management','Upload certificates, track expiry dates, get alerts at 30/15/7 days before expiry.'),
-        ('fa-clipboard-check','#3498db','Digital Hygiene Checklist','Daily & weekly staff checklists covering 18 safety checkpoints.'),
-        ('fa-star-half-stroke','#e67e22','Auto Safety Score (0-100)','Formula-based scoring: checklist 60% + deep-clean 20% + training 20%.'),
-        ('fa-shield-halved','#8e44ad','Public Safety Badge','Gold / Silver / Bronze / Red badges visible to consumers.'),
-        ('fa-gauge','#1abc9c','Unified Dashboard','Operations + safety analytics in one powerful view.'),
-        ('fa-user-graduate','#e74c3c','Staff Training Tracker','Log training records with expiry dates and compliance status.'),
+        ('fa-file-certificate','#1e8449','#d5f5e3','#eafaf1','rgba(39,174,96,0.15)','FSSAI Certificate Management','Upload certificates, track expiry dates, get alerts at 30/15/7 days before expiry.'),
+        ('fa-clipboard-check','#1a5276','#d6eaf8','#eaf4fd','rgba(52,152,219,0.15)','Digital Hygiene Checklist','Daily & weekly staff checklists covering 18 safety checkpoints with photo proof.'),
+        ('fa-star-half-stroke','#9a5814','#fdebd0','#fef5e7','rgba(230,126,34,0.15)','Auto Safety Score (0-100)','Formula-based scoring: checklist 60% + deep-clean 20% + training 20%.'),
+        ('fa-shield-halved','#6c3483','#e8daef','#f4ecf7','rgba(142,68,173,0.15)','Public Safety Badge','Gold / Silver / Bronze / Red badges visible to consumers on every listing.'),
+        ('fa-gauge','#117a65','#d1f2eb','#e8f8f5','rgba(26,188,156,0.15)','Unified Dashboard','Operations + safety analytics in one powerful, real-time view.'),
+        ('fa-user-graduate','#922b21','#f5b7b1','#fdedec','rgba(231,76,60,0.15)','Staff Training Tracker','Log training records with expiry dates, certificates, and compliance status.'),
       ] %}
-      {% for icon, color, title, desc in features %}
+      {% for icon, color, color_light, color_fade, color_shadow, title, desc in features %}
       <div class="col-md-6 col-lg-4">
-        <div class="card h-100" style="border:none;border-radius:14px;box-shadow:0 2px 16px rgba(0,0,0,0.07);">
-          <div class="card-body p-4">
-            <div style="width:52px;height:52px;background:{{ color }}20;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;">
-              <i class="fa-solid {{ icon }}" style="color:{{ color }};font-size:22px;"></i>
-            </div>
-            <h5 style="font-weight:700;margin-bottom:8px;">{{ title }}</h5>
-            <p style="color:#636e72;font-size:14px;margin:0;">{{ desc }}</p>
+        <div class="feature-card-premium" style="--color: {{ color }}; --color-light: {{ color_light }}; --color-fade: {{ color_fade }}; --color-shadow: {{ color_shadow }};">
+          <span class="feature-num">{{ loop.index }}</span>
+          <div class="feature-icon-premium">
+            <i class="fa-solid {{ icon }}"></i>
           </div>
+          <h5 class="feature-title-premium">{{ title }}</h5>
+          <p class="feature-desc-premium">{{ desc }}</p>
         </div>
       </div>
       {% endfor %}
@@ -119,12 +119,12 @@
 </section>
 
 <!-- ══ RESTAURANTS ══ -->
-<section id="restaurants" style="padding:80px 0;background:#f0f4f8;">
+<section id="restaurants" style="padding:100px 0;background:linear-gradient(180deg,#f0f4f8 0%,#e8ecf1 100%);">
   <div class="container">
     <div class="text-center mb-5">
-      <span style="color:#27ae60;font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:1px;">Verified Restaurants</span>
-      <h2 style="font-size:36px;font-weight:800;margin-top:8px;">Browse Safe Restaurants</h2>
-      <p style="color:#636e72;">All restaurants show their real-time hygiene scores and FSSAI status.</p>
+      <span style="color:#27ae60;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:2px;">Verified Restaurants</span>
+      <h2 style="font-size:40px;font-weight:800;margin-top:12px;letter-spacing:-0.5px;color:#1a202c;">Browse Safe Restaurants</h2>
+      <p style="color:#718096;max-width:520px;margin:12px auto 0;font-size:15px;">All restaurants show their real-time hygiene scores, FSSAI status, and safety badges.</p>
     </div>
 
     {% if restaurants %}
