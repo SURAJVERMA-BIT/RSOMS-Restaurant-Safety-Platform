@@ -9,6 +9,7 @@ from urllib.parse import urlparse
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from flask_migrate import Migrate
 from flask_talisman import Talisman
 from werkzeug.utils import secure_filename
 
@@ -57,6 +58,7 @@ def create_app(config_name='default'):
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
     db.init_app(app)
+    Migrate(app, db)
     limiter.init_app(app)
     Talisman(
         app,
