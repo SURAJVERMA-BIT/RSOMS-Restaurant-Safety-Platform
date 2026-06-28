@@ -24,6 +24,7 @@ class DevelopmentConfig(Config):
 class ProductionConfig(Config):
     DEBUG = False
     WTF_CSRF_ENABLED = True
+    FORCE_HTTPS = True
 
 
 config = {

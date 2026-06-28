@@ -8,6 +8,7 @@ from flask import (Flask, render_template, redirect, url_for, flash,
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from flask_talisman import Talisman
 from werkzeug.utils import secure_filename
 
 from config import config
@@ -21,6 +22,32 @@ from forms import (LoginForm, RegisterForm, RestaurantProfileForm, FSSAIUploadFo
 
 limiter = Limiter(key_func=get_remote_address, default_limits=[])
 
+CSP = {
+    'default-src': ["'self'"],
+    'script-src': [
+        "'self'",
+        "'unsafe-inline'",
+        'https://cdn.jsdelivr.net',
+        'https://cdnjs.cloudflare.com',
+        'https://cdn.jsdelivr.net/npm/chart.js',
+    ],
+    'style-src': [
+        "'self'",
+        "'unsafe-inline'",
+        'https://cdn.jsdelivr.net',
+        'https://cdnjs.cloudflare.com',
+        'https://fonts.googleapis.com',
+    ],
+    'font-src': [
+        "'self'",
+        'https://cdnjs.cloudflare.com',
+        'https://fonts.gstatic.com',
+    ],
+    'img-src': ["'self'", 'data:'],
+    'connect-src': ["'self'"],
+    'frame-ancestors': ["'none'"],
+}
+
 
 def create_app(config_name='default'):
     app = Flask(__name__)
@@ -30,6 +57,16 @@ def create_app(config_name='default'):
 
     db.init_app(app)
     limiter.init_app(app)
+    Talisman(
+        app,
+        force_https=app.config.get('FORCE_HTTPS', False),
+        strict_transport_security=app.config.get('FORCE_HTTPS', False),
+        content_security_policy=CSP,
+        content_security_policy_nonce_in=['script-src'],
+        x_content_type_options=True,
+        x_xss_protection=True,
+        referrer_policy='strict-origin-when-cross-origin',
+    )
 
     login_manager = LoginManager(app)
     login_manager.login_view = 'login'
