@@ -59,7 +59,7 @@
               {% endif %}
             </td>
             <td>
-              <form method="POST" action="{{ url_for('menu_toggle', item_id=item.id) }}" class="d-inline toggle-form" data-item="{{ item.id }}">
+              <form method="POST" action="{{ url_for('menu.toggle', item_id=item.id) }}" class="d-inline toggle-form" data-item="{{ item.id }}">
                 {{ form.hidden_tag() }}
                 <button type="submit" class="btn btn-sm" style="border:none;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;background:{{ '#d5f5e3' if item.available else '#fdedec' }};color:{{ '#1e8449' if item.available else '#922b21' }};">
                   {{ '✓ Available' if item.available else '✗ Unavailable' }}
@@ -105,7 +105,7 @@
         <h5 class="modal-title fw-bold"><i class="fa-solid fa-plus me-2 text-success"></i>Add Menu Item</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <form method="POST" action="{{ url_for('menu_add') }}" enctype="multipart/form-data" novalidate>
+      <form method="POST" action="{{ url_for('menu.add') }}" enctype="multipart/form-data" novalidate>
         {{ form.hidden_tag() }}
         <div class="modal-body">
           <div class="row g-3">
