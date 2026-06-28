@@ -5,15 +5,15 @@
 <!-- ══ NAVBAR ══ -->
 <nav class="navbar navbar-expand-lg" style="background:rgba(26,37,47,0.97);backdrop-filter:blur(10px);position:sticky;top:0;z-index:500;">
   <div class="container">
-    <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('index') }}">
+    <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('public.index') }}">
       <div style="width:36px;height:36px;background:#27ae60;border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;">
         <i class="fa-solid fa-utensils"></i>
       </div>
       <span style="color:white;font-weight:800;font-size:18px;">RSOMS</span>
     </a>
     <div class="ms-auto d-flex gap-2">
-      <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-sm">Login</a>
-      <a href="{{ url_for('register') }}" class="btn btn-sm" style="background:#27ae60;color:white;border:none;">Register</a>
+      <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-sm">Login</a>
+      <a href="{{ url_for('auth.register') }}" class="btn btn-sm" style="background:#27ae60;color:white;border:none;">Register</a>
     </div>
   </div>
 </nav>
@@ -35,7 +35,7 @@
           The only platform that combines restaurant operations with <strong style="color:white;">real-time kitchen safety compliance</strong>. Verify FSSAI status, track hygiene scores & order with confidence.
         </p>
         <div class="d-flex gap-3 flex-wrap">
-          <a href="{{ url_for('register') }}" class="btn btn-lg" style="background:#27ae60;color:white;border:none;padding:12px 28px;border-radius:10px;font-weight:700;">
+          <a href="{{ url_for('auth.register') }}" class="btn btn-lg" style="background:#27ae60;color:white;border:none;padding:12px 28px;border-radius:10px;font-weight:700;">
             <i class="fa-solid fa-rocket me-2"></i> Get Started Free
           </a>
           <a href="#restaurants" class="btn btn-lg btn-outline-light" style="padding:12px 28px;border-radius:10px;font-weight:600;">
@@ -131,7 +131,7 @@
     <div class="row g-4">
       {% for r in restaurants %}
       <div class="col-md-6 col-lg-4">
-        <a href="{{ url_for('public_restaurant', restaurant_id=r.id) }}" style="text-decoration:none;">
+        <a href="{{ url_for('public.restaurant', restaurant_id=r.id) }}" style="text-decoration:none;">
           <div class="restaurant-card-public">
             <div class="restaurant-card-header">
               <div class="d-flex justify-content-between align-items-start">
@@ -185,7 +185,7 @@
       <i class="fa-solid fa-store-slash"></i>
       <h5>No restaurants yet</h5>
       <p>Be the first to register your restaurant!</p>
-      <a href="{{ url_for('register') }}" class="btn-primary-custom">Register Restaurant</a>
+      <a href="{{ url_for('auth.register') }}" class="btn-primary-custom">Register Restaurant</a>
     </div>
     {% endif %}
   </div>
