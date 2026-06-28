@@ -1,10 +1,11 @@
 import os
 import json
+import logging
 from datetime import datetime, date
 from functools import wraps
 
 from flask import (Flask, render_template, redirect, url_for, flash,
-                   request, jsonify, abort, session)
+                   request, jsonify)
 from urllib.parse import urlparse
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_limiter import Limiter
@@ -23,6 +24,21 @@ from forms import (LoginForm, RegisterForm, RestaurantProfileForm, FSSAIUploadFo
 
 
 limiter = Limiter(key_func=get_remote_address, default_limits=[])
+
+
+def configure_logging(app):
+    level = logging.DEBUG if app.debug else logging.INFO
+    fmt = logging.Formatter(
+        '[%(asctime)s] %(levelname)s in %(module)s: %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S'
+    )
+    handler = logging.StreamHandler()
+    handler.setLevel(level)
+    handler.setFormatter(fmt)
+    app.logger.handlers.clear()
+    app.logger.addHandler(handler)
+    app.logger.setLevel(level)
+    logging.getLogger('werkzeug').setLevel(logging.WARNING if not app.debug else logging.INFO)
 
 CSP = {
     'default-src': ["'self'"],
@@ -60,6 +76,7 @@ def create_app(config_name='default'):
     db.init_app(app)
     Migrate(app, db)
     limiter.init_app(app)
+    configure_logging(app)
     Talisman(
         app,
         force_https=app.config.get('FORCE_HTTPS', False),
@@ -77,8 +94,8 @@ def create_app(config_name='default'):
     login_manager.login_message = 'Please login to access this page.'
 
     @login_manager.user_loader
-    def load_user(user_id):
-        return User.query.get(int(user_id))
+    def load_user(user_id):  # noqa: used by Flask-Login via decorator
+        return db.session.get(User, int(user_id))
 
     with app.app_context():
         db.create_all()
@@ -738,7 +755,6 @@ def staff_training_delete(rec_id):
 @admin_required
 def analytics():
     restaurant = get_restaurant()
-    from sqlalchemy import extract
 
     checklists_30 = HygieneChecklist.query.filter_by(
         restaurant_id=restaurant.id, checklist_type='daily'
@@ -886,18 +902,19 @@ def api_menu():
 # ─── Error Handlers ───────────────────────────────────────────────────────────
 
 @app.errorhandler(404)
-def not_found(e):
+def not_found(_):
     return render_template('404.html'), 404
 
 
 @app.errorhandler(429)
-def too_many_requests(e):
+def too_many_requests(_):
     flash('Too many requests. Please slow down and try again shortly.', 'danger')
     return render_template('429.html'), 429
 
 
 @app.errorhandler(500)
-def server_error(e):
+def server_error(exc):
+    app.logger.exception('Unhandled server error: %s', exc)
     return render_template('500.html'), 500
 
 
