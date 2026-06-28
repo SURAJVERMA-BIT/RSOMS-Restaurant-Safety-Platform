@@ -4,6 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}RSOMS{% endblock %} — Restaurant Safety & Operations</title>
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo/RSOMS.png') }}">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='logo/RSOMS.png') }}">
+  <!-- Open Graph / Social preview -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="{% block og_title %}RSOMS — Restaurant Safety & Operations{% endblock %}">
+  <meta property="og:description" content="{% block og_description %}A complete restaurant safety and operations management platform.{% endblock %}">
+  <meta property="og:image" content="{{ request.host_url }}static/logo/RSOMS.png">
+  <meta property="og:url" content="{{ request.url }}">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:image" content="{{ request.host_url }}static/logo/RSOMS.png">
   <!-- Bootstrap 5 -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- Font Awesome 6 -->
@@ -24,7 +35,7 @@
 
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-brand">
-    <div class="brand-icon"><i class="fa-solid fa-utensils"></i></div>
+    <img src="{{ url_for('static', filename='logo/RSOMS.png') }}" alt="RSOMS Logo" style="width:56px;height:56px;object-fit:contain;border-radius:10px;">
     <h5>RSOMS</h5>
     <small>Restaurant Management</small>
   </div>
