@@ -117,6 +117,18 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
+  // ── Password show/hide toggle (CSP-safe, data-attribute based) ──
+  document.querySelectorAll('[data-toggle-pass]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      const input = document.getElementById(btn.getAttribute('data-toggle-pass'));
+      if (!input) return;
+      const icon = btn.querySelector('i');
+      const reveal = input.type === 'password';
+      input.type = reveal ? 'text' : 'password';
+      if (icon) icon.className = reveal ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye';
+    });
+  });
+
 });
 
 // ── Global helper: format currency ──

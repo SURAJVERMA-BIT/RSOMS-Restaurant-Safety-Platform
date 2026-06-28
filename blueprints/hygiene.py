@@ -19,6 +19,9 @@ hygiene_bp = Blueprint('hygiene', __name__)
 @staff_or_admin
 def index():
     restaurant = get_restaurant()
+    if not restaurant:
+        flash('No restaurant assigned. Ask your admin to link your account.', 'warning')
+        return redirect(url_for('dashboard.index'))
     form = HygieneChecklistForm()
     today_daily = HygieneChecklist.query.filter_by(
         restaurant_id=restaurant.id, checklist_type='daily', date=date.today()

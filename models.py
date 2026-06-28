@@ -15,6 +15,8 @@ class User(UserMixin, db.Model):
     role = db.Column(db.String(20), default='consumer')  # admin, staff, consumer
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+    restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurants.id'), nullable=True)
+
     restaurant = db.relationship('Restaurant', backref='owner', uselist=False,
                                  foreign_keys='Restaurant.owner_id')
 

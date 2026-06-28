@@ -2,9 +2,12 @@ import os
 import logging
 from datetime import datetime
 
+from dotenv import load_dotenv
 from flask import Flask, render_template, flash, jsonify
 from flask_login import current_user
 from flask_talisman import Talisman
+
+load_dotenv()
 
 from config import config
 from extensions import db, login_manager, limiter, migrate
@@ -21,7 +24,6 @@ from blueprints.analytics import analytics_bp
 from blueprints.notifications import notifications_bp
 from blueprints.public import public_bp
 from blueprints.api import api_bp
-
 
 CSP = {
     'default-src': ["'self'"],

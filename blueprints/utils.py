@@ -12,7 +12,12 @@ def allowed_file(filename):
 
 def get_restaurant():
     from models import Restaurant
-    return Restaurant.query.filter_by(owner_id=current_user.id).first()
+    from extensions import db
+    if current_user.role == 'admin':
+        return Restaurant.query.filter_by(owner_id=current_user.id).first()
+    if current_user.role == 'staff' and current_user.restaurant_id:
+        return db.session.get(Restaurant, current_user.restaurant_id)
+    return None
 
 
 def get_notifications(restaurant):

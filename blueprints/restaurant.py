@@ -1,6 +1,6 @@
 import os
 
-from flask import Blueprint, render_template, redirect, url_for, flash, current_app
+from flask import Blueprint, render_template, redirect, url_for, flash, current_app, request
 from flask_login import login_required
 from werkzeug.utils import secure_filename
 
@@ -33,12 +33,47 @@ def profile():
         flash('Restaurant profile updated!', 'success')
         return redirect(url_for('restaurant.profile'))
 
+    from models import User
+    linked_staff = User.query.filter_by(restaurant_id=restaurant.id, role='staff').all() if restaurant else []
     notifications = get_notifications(restaurant)
     return render_template('restaurant_profile.html',
                            restaurant=restaurant,
                            form=form,
                            upload_form=upload_form,
-                           notifications=notifications)
+                           notifications=notifications,
+                           linked_staff=linked_staff)
+
+
+@restaurant_bp.route('/restaurant/staff/link', methods=['POST'])
+@login_required
+@admin_required
+def link_staff():
+    from models import User
+    restaurant = get_restaurant()
+    email = request.form.get('staff_email', '').strip().lower()
+    user = User.query.filter(User.email.ilike(email), User.role == 'staff').first()
+    if not user:
+        flash('No staff account found with that email.', 'danger')
+    elif user.restaurant_id == restaurant.id:
+        flash(f'{user.username} is already linked to this restaurant.', 'info')
+    else:
+        user.restaurant_id = restaurant.id
+        db.session.commit()
+        flash(f'{user.username} has been linked to {restaurant.name}.', 'success')
+    return redirect(url_for('restaurant.profile'))
+
+
+@restaurant_bp.route('/restaurant/staff/<int:user_id>/unlink', methods=['POST'])
+@login_required
+@admin_required
+def unlink_staff(user_id):
+    from models import User
+    restaurant = get_restaurant()
+    user = User.query.filter_by(id=user_id, restaurant_id=restaurant.id, role='staff').first_or_404()
+    user.restaurant_id = None
+    db.session.commit()
+    flash(f'{user.username} has been removed from {restaurant.name}.', 'info')
+    return redirect(url_for('restaurant.profile'))
 
 
 @restaurant_bp.route('/restaurant/fssai-upload', methods=['POST'])

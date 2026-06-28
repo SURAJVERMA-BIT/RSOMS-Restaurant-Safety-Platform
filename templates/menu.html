@@ -21,7 +21,14 @@
       </span>
     </div>
     <div class="card-body p-0 table-responsive-wrapper">
-      <table class="table-clean w-100">
+      <table class="table-clean w-100" style="table-layout:fixed;">
+        <colgroup>
+          <col style="width:auto;">
+          <col style="width:110px;">
+          <col style="width:100px;">
+          <col style="width:140px;">
+          <col style="width:90px;">
+        </colgroup>
         <thead>
           <tr>
             <th>Item</th><th>Price</th><th>Type</th><th>Status</th><th>Actions</th>
@@ -42,9 +49,9 @@
                 <div class="d-flex align-items-center gap-2">
                   <span class="veg-dot {{ 'veg' if item.is_veg else 'nonveg' }}"></span>
                   <div>
-                    <div style="font-weight:600;">{{ item.name }}</div>
+                    <div style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ item.name }}</div>
                     {% if item.description %}
-                    <div style="font-size:12px;color:#aaa;">{{ item.description[:60] }}{% if item.description|length > 60 %}...{% endif %}</div>
+                    <div style="font-size:12px;color:#aaa;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ item.description[:55] }}{% if item.description|length > 55 %}...{% endif %}</div>
                     {% endif %}
                   </div>
                 </div>
@@ -68,10 +75,22 @@
             </td>
             <td>
               <div class="d-flex gap-1">
-                <button class="btn btn-sm" style="background:#eaf4fd;color:#3498db;border:none;" onclick="editItem({{ item.id }}, '{{ item.name|e }}', '{{ item.description|e }}', {{ item.price }}, '{{ item.category }}', {{ 'true' if item.is_veg else 'false' }}, {{ 'true' if item.available else 'false' }}, '{{ item.image_path|e }}')">
+                <button class="btn btn-sm menu-edit-btn"
+                  style="background:#eaf4fd;color:#3498db;border:none;"
+                  data-id="{{ item.id }}"
+                  data-name="{{ item.name|e }}"
+                  data-desc="{{ item.description|e }}"
+                  data-price="{{ item.price }}"
+                  data-cat="{{ item.category }}"
+                  data-veg="{{ 'true' if item.is_veg else 'false' }}"
+                  data-avail="{{ 'true' if item.available else 'false' }}"
+                  data-img="{{ item.image_path|e if item.image_path else '' }}">
                   <i class="fa-solid fa-pen-to-square"></i>
                 </button>
-                <button class="btn btn-sm" style="background:#fdedec;color:#e74c3c;border:none;" onclick="confirmDelete({{ item.id }}, '{{ item.name|e }}')">
+                <button class="btn btn-sm menu-delete-btn"
+                  style="background:#fdedec;color:#e74c3c;border:none;"
+                  data-id="{{ item.id }}"
+                  data-name="{{ item.name|e }}">
                   <i class="fa-solid fa-trash"></i>
                 </button>
               </div>
@@ -241,30 +260,38 @@
 {% endblock %}
 
 {% block extra_scripts %}
-<script>
-function editItem(id, name, desc, price, cat, isVeg, avail, imagePath) {
-  document.getElementById('editItemForm').action = '/menu/' + id + '/edit';
-  document.getElementById('edit_name').value = name;
-  document.getElementById('edit_description').value = desc;
-  document.getElementById('edit_price').value = price;
-  document.getElementById('edit_category').value = cat;
-  document.getElementById('edit_is_veg').checked = isVeg;
-  document.getElementById('edit_available').checked = avail;
-  const previewBox = document.getElementById('editImagePreviewBox');
-  const previewImg = document.getElementById('editImagePreview');
-  if (imagePath) {
-    previewImg.src = '/static/uploads/' + imagePath;
-    previewBox.style.display = 'block';
-  } else {
-    previewBox.style.display = 'none';
-    previewImg.src = '';
-  }
-  new bootstrap.Modal(document.getElementById('editItemModal')).show();
-}
-function confirmDelete(id, name) {
-  document.getElementById('deleteItemForm').action = '/menu/' + id + '/delete';
-  document.getElementById('deleteItemName').textContent = name;
-  new bootstrap.Modal(document.getElementById('deleteModal')).show();
-}
+<script nonce="{{ csp_nonce() }}">
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('.menu-edit-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var d = btn.dataset;
+      document.getElementById('editItemForm').action = '/menu/' + d.id + '/edit';
+      document.getElementById('edit_name').value = d.name;
+      document.getElementById('edit_description').value = d.desc;
+      document.getElementById('edit_price').value = d.price;
+      document.getElementById('edit_category').value = d.cat;
+      document.getElementById('edit_is_veg').checked = (d.veg === 'true');
+      document.getElementById('edit_available').checked = (d.avail === 'true');
+      var previewBox = document.getElementById('editImagePreviewBox');
+      var previewImg = document.getElementById('editImagePreview');
+      if (d.img) {
+        previewImg.src = '/static/uploads/' + d.img;
+        previewBox.style.display = 'block';
+      } else {
+        previewBox.style.display = 'none';
+        previewImg.src = '';
+      }
+      new bootstrap.Modal(document.getElementById('editItemModal')).show();
+    });
+  });
+
+  document.querySelectorAll('.menu-delete-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      document.getElementById('deleteItemForm').action = '/menu/' + btn.dataset.id + '/delete';
+      document.getElementById('deleteItemName').textContent = btn.dataset.name;
+      new bootstrap.Modal(document.getElementById('deleteModal')).show();
+    });
+  });
+});
 </script>
 {% endblock %}

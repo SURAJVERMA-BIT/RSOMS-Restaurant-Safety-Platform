@@ -109,6 +109,9 @@ def payment(order_id):
 @staff_or_admin
 def kds():
     restaurant = get_restaurant()
+    if not restaurant:
+        flash('No restaurant assigned. Ask your admin to link your account.', 'warning')
+        return redirect(url_for('dashboard.index'))
     active = Order.query.filter_by(restaurant_id=restaurant.id).filter(
         Order.status.in_(['placed', 'preparing'])
     ).order_by(Order.created_at).all()
