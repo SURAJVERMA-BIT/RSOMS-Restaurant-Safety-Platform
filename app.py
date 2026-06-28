@@ -6,6 +6,8 @@ from functools import wraps
 from flask import (Flask, render_template, redirect, url_for, flash,
                    request, jsonify, abort, session)
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from werkzeug.utils import secure_filename
 
 from config import config
@@ -17,6 +19,9 @@ from forms import (LoginForm, RegisterForm, RestaurantProfileForm, FSSAIUploadFo
                    StaffTrainingForm, FeedbackForm)
 
 
+limiter = Limiter(key_func=get_remote_address, default_limits=[])
+
+
 def create_app(config_name='default'):
     app = Flask(__name__)
     app.config.from_object(config[config_name])
@@ -24,6 +29,7 @@ def create_app(config_name='default'):
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
     db.init_app(app)
+    limiter.init_app(app)
 
     login_manager = LoginManager(app)
     login_manager.login_view = 'login'
@@ -132,6 +138,7 @@ def index():
 
 
 @app.route('/login', methods=['GET', 'POST'])
+@limiter.limit('10 per minute; 50 per hour')
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('dashboard'))
@@ -148,6 +155,7 @@ def login():
 
 
 @app.route('/register', methods=['GET', 'POST'])
+@limiter.limit('5 per minute; 20 per hour')
 def register():
     if current_user.is_authenticated:
         return redirect(url_for('dashboard'))
@@ -290,6 +298,7 @@ def restaurant_profile():
 @app.route('/restaurant/fssai-upload', methods=['POST'])
 @login_required
 @admin_required
+@limiter.limit('10 per hour')
 def fssai_upload():
     restaurant = get_restaurant()
     upload_form = FSSAIUploadForm()
@@ -745,6 +754,7 @@ def public_restaurant(restaurant_id):
 
 
 @app.route('/restaurant/<int:restaurant_id>/feedback', methods=['POST'])
+@limiter.limit('5 per minute; 30 per hour')
 def submit_feedback(restaurant_id):
     restaurant = Restaurant.query.filter_by(id=restaurant_id, is_public=True).first_or_404()
     form = FeedbackForm()
@@ -824,6 +834,12 @@ def api_menu():
 @app.errorhandler(404)
 def not_found(e):
     return render_template('404.html'), 404
+
+
+@app.errorhandler(429)
+def too_many_requests(e):
+    flash('Too many requests. Please slow down and try again shortly.', 'danger')
+    return render_template('429.html'), 429
 
 
 @app.errorhandler(500)

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}429 — Too Many Requests{% endblock %}
+
+{% block public_content %}
+<div style="min-height:100vh;background:linear-gradient(135deg,#1a252f,#2c3e50);display:flex;align-items:center;justify-content:center;padding:20px;">
+  <div style="text-align:center;color:white;">
+    <div style="font-size:120px;font-weight:900;color:rgba(255,255,255,0.1);line-height:1;">429</div>
+    <h2 style="font-weight:800;margin-top:-20px;">Too Many Requests</h2>
+    <p style="color:rgba(255,255,255,0.6);margin-bottom:32px;">You're sending requests too fast. Please wait a moment and try again.</p>
+    <a href="{{ url_for('index') }}" class="btn" style="background:#27ae60;color:white;border:none;padding:12px 32px;border-radius:10px;font-weight:700;">
+      <i class="fa-solid fa-house me-2"></i>Back to Home
+    </a>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

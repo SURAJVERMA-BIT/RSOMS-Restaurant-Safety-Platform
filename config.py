@@ -14,6 +14,7 @@ class Config:
     MAX_CONTENT_LENGTH = 5 * 1024 * 1024  # 5 MB limit
     ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg', 'webp', 'gif', 'bmp'}
     PERMANENT_SESSION_LIFETIME = timedelta(hours=8)
+    RATELIMIT_STORAGE_URI = os.environ.get('REDIS_URL', 'memory://')
 
 
 class DevelopmentConfig(Config):
