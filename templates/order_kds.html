@@ -8,7 +8,7 @@
     <span class="pulse-dot"></span>
     <small class="text-muted">Auto-refreshes every 30 seconds</small>
   </div>
-  <a href="{{ url_for('orders') }}" class="btn btn-sm" style="background:#f0f4f8;color:#636e72;border:none;border-radius:8px;">
+  <a href="{{ url_for('orders.index') }}" class="btn btn-sm" style="background:#f0f4f8;color:#636e72;border:none;border-radius:8px;">
     <i class="fa-solid fa-list me-1"></i> All Orders
   </a>
 </div>
@@ -49,7 +49,7 @@
           </div>
           {% endif %}
           <!-- Advance status button -->
-          <form method="POST" action="{{ url_for('order_status', order_id=order.id) }}">
+          <form method="POST" action="{{ url_for('orders.status', order_id=order.id) }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <input type="hidden" name="status" value="{{ order.next_status() }}">
             <button type="submit" class="btn w-100" style="border:none;border-radius:8px;font-weight:700;padding:8px;color:white;
@@ -90,7 +90,7 @@
         <div class="mb-2" style="font-size:13px;color:#636e72;">
           {% for oi in order.items %}{{ oi.menu_item.name }}×{{ oi.quantity }}{% if not loop.last %}, {% endif %}{% endfor %}
         </div>
-        <form method="POST" action="{{ url_for('order_status', order_id=order.id) }}">
+        <form method="POST" action="{{ url_for('orders.status', order_id=order.id) }}">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <input type="hidden" name="status" value="served">
           <button type="submit" class="btn w-100" style="background:#27ae60;color:white;border:none;border-radius:8px;font-weight:700;padding:7px;">

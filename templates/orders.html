@@ -7,7 +7,7 @@
   <!-- Status Filter Tabs -->
   <div style="background:white;border-radius:10px;padding:4px;box-shadow:0 1px 6px rgba(0,0,0,0.06);display:flex;gap:2px;">
     {% for s in ['all','placed','preparing','ready','served'] %}
-    <a href="{{ url_for('orders', status=s) }}"
+    <a href="{{ url_for('orders.index', status=s) }}"
        style="padding:7px 16px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;
               background:{{ '#27ae60' if status_filter == s else 'transparent' }};
               color:{{ 'white' if status_filter == s else '#636e72' }};">
@@ -16,7 +16,7 @@
     {% endfor %}
   </div>
   <div class="d-flex gap-2">
-    <a href="{{ url_for('order_kds') }}" class="btn btn-sm" style="background:#f5eef8;color:#8e44ad;border:none;font-weight:600;border-radius:8px;padding:8px 16px;">
+    <a href="{{ url_for('orders.kds') }}" class="btn btn-sm" style="background:#f5eef8;color:#8e44ad;border:none;font-weight:600;border-radius:8px;padding:8px 16px;">
       <i class="fa-solid fa-kitchen-set me-1"></i> KDS View
     </a>
     <button class="btn-primary-custom" data-bs-toggle="modal" data-bs-target="#newOrderModal">
@@ -66,7 +66,7 @@
                 <i class="fa-solid fa-check me-1"></i>Paid
               </span>
             {% else %}
-              <form method="POST" action="{{ url_for('order_payment', order_id=order.id) }}" class="d-inline">
+              <form method="POST" action="{{ url_for('orders.payment', order_id=order.id) }}" class="d-inline">
                 {{ form.hidden_tag() }}
                 <button type="submit" style="background:#fef9e7;color:#9a7d0a;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;border:none;cursor:pointer;">
                   <i class="fa-solid fa-money-bill me-1"></i>Mark Paid
@@ -76,7 +76,7 @@
 
             <!-- Status advance -->
             {% if order.status != 'served' %}
-            <form method="POST" action="{{ url_for('order_status', order_id=order.id) }}" class="d-inline">
+            <form method="POST" action="{{ url_for('orders.status', order_id=order.id) }}" class="d-inline">
               {{ form.hidden_tag() }}
               <input type="hidden" name="status" value="{{ order.next_status() }}">
               <button type="submit" class="btn btn-sm" style="background:#eafaf1;color:#1e8449;border:none;font-size:12px;font-weight:600;border-radius:8px;padding:6px 14px;">
@@ -111,7 +111,7 @@
         <h5 class="modal-title fw-bold"><i class="fa-solid fa-plus me-2 text-success"></i>New Order</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <form method="POST" action="{{ url_for('order_create') }}" novalidate>
+      <form method="POST" action="{{ url_for('orders.create') }}" novalidate>
         {{ form.hidden_tag() }}
         <div class="modal-body">
           <div class="row g-3 mb-3">
