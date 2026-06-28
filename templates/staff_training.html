@@ -65,7 +65,7 @@
             </span>
           </td>
           <td>
-            <form method="POST" action="{{ url_for('staff_training_delete', rec_id=rec.id) }}" class="d-inline" onsubmit="return confirm('Delete this training record?')">
+            <form method="POST" action="{{ url_for('staff.training_delete', rec_id=rec.id) }}" class="d-inline" onsubmit="return confirm('Delete this training record?')">
               {{ form.hidden_tag() }}
               <button type="submit" class="btn btn-sm" style="background:#fdedec;color:#e74c3c;border:none;">
                 <i class="fa-solid fa-trash"></i>
@@ -113,7 +113,7 @@
         <h5 class="modal-title fw-bold"><i class="fa-solid fa-user-plus me-2 text-success"></i>Add Training Record</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <form method="POST" action="{{ url_for('staff_training_add') }}" novalidate>
+      <form method="POST" action="{{ url_for('staff.training_add') }}" novalidate>
         {{ form.hidden_tag() }}
         <div class="modal-body">
           <div class="row g-3">

@@ -32,7 +32,7 @@
           <span id="daily-progress" style="font-size:13px;color:#27ae60;font-weight:600;">0 / {{ daily_tasks|length }}</span>
         </div>
         <div class="card-body">
-          <form method="POST" action="{{ url_for('hygiene_submit') }}" id="dailyForm" enctype="multipart/form-data">
+          <form method="POST" action="{{ url_for('hygiene.submit') }}" id="dailyForm" enctype="multipart/form-data">
             {{ form.hidden_tag() }}
             <input type="hidden" name="checklist_type" value="daily">
             {% for task in daily_tasks %}
@@ -70,7 +70,7 @@
           <span id="weekly-progress" style="font-size:13px;color:#3498db;font-weight:600;">0 / {{ weekly_tasks|length }}</span>
         </div>
         <div class="card-body">
-          <form method="POST" action="{{ url_for('hygiene_submit') }}" id="weeklyForm" enctype="multipart/form-data">
+          <form method="POST" action="{{ url_for('hygiene.submit') }}" id="weeklyForm" enctype="multipart/form-data">
             {{ form.hidden_tag() }}
             <input type="hidden" name="checklist_type" value="weekly">
             {% for task in weekly_tasks %}
