@@ -27,37 +27,37 @@
 
   <nav class="sidebar-nav">
     <div class="nav-section-label">Main</div>
-    <a href="{{ url_for('dashboard') }}" class="nav-item-link {% if request.endpoint == 'dashboard' %}active{% endif %}">
+    <a href="{{ url_for('dashboard.index') }}" class="nav-item-link {% if request.endpoint == 'dashboard.index' %}active{% endif %}">
       <i class="fa-solid fa-gauge nav-icon"></i> Dashboard
     </a>
-    <a href="{{ url_for('restaurant_profile') }}" class="nav-item-link {% if request.endpoint == 'restaurant_profile' %}active{% endif %}">
+    <a href="{{ url_for('restaurant.profile') }}" class="nav-item-link {% if request.endpoint == 'restaurant.profile' %}active{% endif %}">
       <i class="fa-solid fa-store nav-icon"></i> Restaurant Profile
     </a>
 
     <div class="nav-section-label">Operations</div>
-    <a href="{{ url_for('menu') }}" class="nav-item-link {% if request.endpoint == 'menu' %}active{% endif %}">
+    <a href="{{ url_for('menu.index') }}" class="nav-item-link {% if request.endpoint == 'menu.index' %}active{% endif %}">
       <i class="fa-solid fa-book-open nav-icon"></i> Menu Management
     </a>
-    <a href="{{ url_for('orders') }}" class="nav-item-link {% if request.endpoint in ('orders', 'order_kds') %}active{% endif %}">
+    <a href="{{ url_for('orders.index') }}" class="nav-item-link {% if request.endpoint in ('orders.index', 'orders.kds') %}active{% endif %}">
       <i class="fa-solid fa-receipt nav-icon"></i> Orders
     </a>
-    <a href="{{ url_for('order_kds') }}" class="nav-item-link {% if request.endpoint == 'order_kds' %}active{% endif %}">
+    <a href="{{ url_for('orders.kds') }}" class="nav-item-link {% if request.endpoint == 'orders.kds' %}active{% endif %}">
       <i class="fa-solid fa-kitchen-set nav-icon"></i> Kitchen Display
     </a>
 
     <div class="nav-section-label">Safety & Compliance</div>
-    <a href="{{ url_for('hygiene') }}" class="nav-item-link {% if request.endpoint == 'hygiene' %}active{% endif %}">
+    <a href="{{ url_for('hygiene.index') }}" class="nav-item-link {% if request.endpoint == 'hygiene.index' %}active{% endif %}">
       <i class="fa-solid fa-clipboard-check nav-icon"></i> Hygiene Checklist
     </a>
-    <a href="{{ url_for('staff_training') }}" class="nav-item-link {% if request.endpoint == 'staff_training' %}active{% endif %}">
+    <a href="{{ url_for('staff.training') }}" class="nav-item-link {% if request.endpoint == 'staff.training' %}active{% endif %}">
       <i class="fa-solid fa-user-graduate nav-icon"></i> Staff Training
     </a>
 
     <div class="nav-section-label">Analytics</div>
-    <a href="{{ url_for('analytics') }}" class="nav-item-link {% if request.endpoint == 'analytics' %}active{% endif %}">
+    <a href="{{ url_for('analytics.index') }}" class="nav-item-link {% if request.endpoint == 'analytics.index' %}active{% endif %}">
       <i class="fa-solid fa-chart-line nav-icon"></i> Analytics
     </a>
-    <a href="{{ url_for('notifications') }}" class="nav-item-link {% if request.endpoint == 'notifications' %}active{% endif %}">
+    <a href="{{ url_for('notifications.index') }}" class="nav-item-link {% if request.endpoint == 'notifications.index' %}active{% endif %}">
       <i class="fa-solid fa-bell nav-icon"></i> Notifications
       {% if notification_count > 0 %}
         <span class="nav-badge">{{ notification_count }}</span>
@@ -66,11 +66,11 @@
 
     <div class="nav-section-label">Public</div>
     {% if g_restaurant %}
-    <a href="{{ url_for('public_restaurant', restaurant_id=g_restaurant.id) }}" class="nav-item-link" target="_blank">
+    <a href="{{ url_for('public.restaurant', restaurant_id=g_restaurant.id) }}" class="nav-item-link" target="_blank">
       <i class="fa-solid fa-eye nav-icon"></i> Public Page
     </a>
     {% endif %}
-    <a href="{{ url_for('index') }}" class="nav-item-link">
+    <a href="{{ url_for('public.index') }}" class="nav-item-link">
       <i class="fa-solid fa-house nav-icon"></i> Home
     </a>
   </nav>
@@ -83,7 +83,7 @@
         <div class="role">{{ current_user.role.title() }}</div>
       </div>
     </div>
-    <a href="{{ url_for('logout') }}" class="nav-item-link mt-2" style="padding:8px 0;">
+    <a href="{{ url_for('auth.logout') }}" class="nav-item-link mt-2" style="padding:8px 0;">
       <i class="fa-solid fa-right-from-bracket nav-icon"></i> Logout
     </a>
   </div>
@@ -117,7 +117,7 @@
       </span>
       {% endif %}
 
-      <a href="{{ url_for('notifications') }}" class="position-relative" style="color:#636e72;">
+      <a href="{{ url_for('notifications.index') }}" class="position-relative" style="color:#636e72;">
         <i class="fa-solid fa-bell fs-5"></i>
         {% if notification_count > 0 %}
           <span class="notif-dot">{{ notification_count }}</span>
