@@ -31,6 +31,10 @@ class User(UserMixin, db.Model):
 
 class Restaurant(db.Model):
     __tablename__ = 'restaurants'
+    __table_args__ = (
+        db.Index('ix_restaurants_owner_id', 'owner_id'),
+        db.Index('ix_restaurants_safety_score', 'safety_score'),
+    )
     id = db.Column(db.Integer, primary_key=True)
     owner_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     name = db.Column(db.String(200), nullable=False)
@@ -163,6 +167,11 @@ class MenuItem(db.Model):
 
 class Order(db.Model):
     __tablename__ = 'orders'
+    __table_args__ = (
+        db.Index('ix_orders_restaurant_id', 'restaurant_id'),
+        db.Index('ix_orders_status', 'status'),
+        db.Index('ix_orders_created_at', 'created_at'),
+    )
     id = db.Column(db.Integer, primary_key=True)
     restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurants.id'), nullable=False)
     customer_name = db.Column(db.String(100), nullable=False)
@@ -231,6 +240,10 @@ WEEKLY_TASKS = [
 
 class HygieneChecklist(db.Model):
     __tablename__ = 'hygiene_checklists'
+    __table_args__ = (
+        db.Index('ix_hygiene_restaurant_date', 'restaurant_id', 'date'),
+        db.Index('ix_hygiene_type', 'checklist_type'),
+    )
     id = db.Column(db.Integer, primary_key=True)
     restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurants.id'), nullable=False)
     staff_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
@@ -265,6 +278,10 @@ class HygieneChecklist(db.Model):
 
 class StaffTraining(db.Model):
     __tablename__ = 'staff_training'
+    __table_args__ = (
+        db.Index('ix_training_restaurant_id', 'restaurant_id'),
+        db.Index('ix_training_status', 'status'),
+    )
     id = db.Column(db.Integer, primary_key=True)
     restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurants.id'), nullable=False)
     staff_name = db.Column(db.String(100), nullable=False)
