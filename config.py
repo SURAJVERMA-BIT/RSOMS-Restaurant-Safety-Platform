@@ -26,6 +26,13 @@ class ProductionConfig(Config):
     WTF_CSRF_ENABLED = True
     FORCE_HTTPS = True
 
+    def __init__(self):
+        if not os.environ.get('SECRET_KEY'):
+            raise RuntimeError(
+                'SECRET_KEY environment variable is not set. '
+                'Set it before starting the app in production.'
+            )
+
 
 config = {
     'development': DevelopmentConfig,
