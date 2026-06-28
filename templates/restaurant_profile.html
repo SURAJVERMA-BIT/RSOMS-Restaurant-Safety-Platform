@@ -33,7 +33,7 @@
         <i class="fa-solid fa-store me-2 text-success"></i>Restaurant Details
       </div>
       <div class="card-body">
-        <form method="POST" action="{{ url_for('restaurant_profile') }}" novalidate>
+        <form method="POST" action="{{ url_for('restaurant.profile') }}" novalidate>
           {{ form.hidden_tag() }}
           <div class="row g-3">
             <div class="col-12">
@@ -99,7 +99,7 @@
     <div class="card mb-3">
       <div class="card-header"><i class="fa-solid fa-upload me-2" style="color:#3498db;"></i>Upload FSSAI Certificate</div>
       <div class="card-body">
-        <form method="POST" action="{{ url_for('fssai_upload') }}" enctype="multipart/form-data">
+        <form method="POST" action="{{ url_for('restaurant.fssai_upload') }}" enctype="multipart/form-data">
           {{ upload_form.hidden_tag() }}
           <div class="mb-3">
             {{ upload_form.certificate(class="form-control") }}
@@ -151,7 +151,7 @@
       <div class="card-body text-center">
         <i class="fa-solid fa-eye fa-2x mb-2" style="color:#636e72;opacity:0.5;"></i>
         <p style="font-size:13px;color:#636e72;margin-bottom:12px;">See how your restaurant appears to the public</p>
-        <a href="{{ url_for('public_restaurant', restaurant_id=restaurant.id) }}" target="_blank" class="btn w-100" style="border:2px solid #27ae60;color:#27ae60;border-radius:8px;font-weight:600;">
+        <a href="{{ url_for('public.restaurant', restaurant_id=restaurant.id) }}" target="_blank" class="btn w-100" style="border:2px solid #27ae60;color:#27ae60;border-radius:8px;font-weight:600;">
           <i class="fa-solid fa-arrow-up-right-from-square me-2"></i> View Public Page
         </a>
       </div>

@@ -5,13 +5,13 @@
 <!-- Navbar -->
 <nav style="background:rgba(26,37,47,0.97);padding:14px 0;position:sticky;top:0;z-index:500;">
   <div class="container d-flex align-items-center justify-content-between">
-    <a href="{{ url_for('index') }}" style="text-decoration:none;display:flex;align-items:center;gap:10px;">
+    <a href="{{ url_for('public.index') }}" style="text-decoration:none;display:flex;align-items:center;gap:10px;">
       <div style="width:34px;height:34px;background:#27ae60;border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-size:15px;">
         <i class="fa-solid fa-utensils"></i>
       </div>
       <span style="color:white;font-weight:800;">RSOMS</span>
     </a>
-    <a href="{{ url_for('index') }}" style="color:rgba(255,255,255,0.6);font-size:13px;">← Back to Listings</a>
+    <a href="{{ url_for('public.index') }}" style="color:rgba(255,255,255,0.6);font-size:13px;">← Back to Listings</a>
   </div>
 </nav>
 
@@ -186,7 +186,7 @@
         <div class="card">
           <div class="card-header"><i class="fa-solid fa-pen-to-square me-2" style="color:#8e44ad;"></i>Leave a Review</div>
           <div class="card-body">
-            <form method="POST" action="{{ url_for('submit_feedback', restaurant_id=restaurant.id) }}" novalidate>
+            <form method="POST" action="{{ url_for('public.submit_feedback', restaurant_id=restaurant.id) }}" novalidate>
               {{ form.hidden_tag() }}
               <div class="row g-3">
                 <div class="col-md-6">

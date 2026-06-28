@@ -42,22 +42,22 @@
         <tr>
           <td><span style="color:#e74c3c;font-weight:600;">FSSAI Expired / Critical</span></td>
           <td>Upload renewed certificate and update expiry date</td>
-          <td><a href="{{ url_for('restaurant_profile') }}" style="color:#27ae60;font-weight:600;">Restaurant Profile →</a></td>
+          <td><a href="{{ url_for('restaurant.profile') }}" style="color:#27ae60;font-weight:600;">Restaurant Profile →</a></td>
         </tr>
         <tr>
           <td><span style="color:#f39c12;font-weight:600;">Checklist Pending</span></td>
           <td>Submit today's daily hygiene checklist</td>
-          <td><a href="{{ url_for('hygiene') }}" style="color:#27ae60;font-weight:600;">Hygiene Checklist →</a></td>
+          <td><a href="{{ url_for('hygiene.index') }}" style="color:#27ae60;font-weight:600;">Hygiene Checklist →</a></td>
         </tr>
         <tr>
           <td><span style="color:#3498db;font-weight:600;">Training Expiring Soon</span></td>
           <td>Schedule refresher training and update records</td>
-          <td><a href="{{ url_for('staff_training') }}" style="color:#27ae60;font-weight:600;">Staff Training →</a></td>
+          <td><a href="{{ url_for('staff.training') }}" style="color:#27ae60;font-weight:600;">Staff Training →</a></td>
         </tr>
         <tr>
           <td><span style="color:#e74c3c;font-weight:600;">Training Expired</span></td>
           <td>Complete training immediately and log completion date</td>
-          <td><a href="{{ url_for('staff_training') }}" style="color:#27ae60;font-weight:600;">Staff Training →</a></td>
+          <td><a href="{{ url_for('staff.training') }}" style="color:#27ae60;font-weight:600;">Staff Training →</a></td>
         </tr>
       </tbody>
     </table>
@@ -71,8 +71,8 @@
     <h4 style="color:#2d3436;">All Clear!</h4>
     <p style="color:#aaa;font-size:15px;">No pending alerts. Your restaurant is fully compliant.</p>
     <div class="d-flex gap-3 justify-content-center mt-3">
-      <a href="{{ url_for('hygiene') }}" class="btn-primary-custom">Submit Checklist</a>
-      <a href="{{ url_for('dashboard') }}" class="btn-outline-primary-custom">Back to Dashboard</a>
+      <a href="{{ url_for('hygiene.index') }}" class="btn-primary-custom">Submit Checklist</a>
+      <a href="{{ url_for('dashboard.index') }}" class="btn-outline-primary-custom">Back to Dashboard</a>
     </div>
   </div>
 </div>
