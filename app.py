@@ -165,6 +165,17 @@ def get_notifications(restaurant):
     return notes
 
 
+# ─── Health Check ─────────────────────────────────────────────────────────────
+
+@app.route('/health')
+def health():
+    try:
+        db.session.execute(db.text('SELECT 1'))
+        return jsonify({'status': 'ok', 'db': 'connected'}), 200
+    except Exception:
+        return jsonify({'status': 'error', 'db': 'unreachable'}), 503
+
+
 # ─── Public / Auth Routes ─────────────────────────────────────────────────────
 
 @app.route('/')
