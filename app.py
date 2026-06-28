@@ -5,6 +5,7 @@ from functools import wraps
 
 from flask import (Flask, render_template, redirect, url_for, flash,
                    request, jsonify, abort, session)
+from urllib.parse import urlparse
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -185,7 +186,10 @@ def login():
         if user and user.check_password(form.password.data):
             login_user(user, remember=True)
             flash(f'Welcome back, {user.username}!', 'success')
-            nxt = request.args.get('next')
+            nxt = request.args.get('next', '')
+            parsed = urlparse(nxt)
+            if parsed.netloc or parsed.scheme:
+                nxt = ''
             return redirect(nxt or url_for('dashboard'))
         flash('Invalid email or password.', 'danger')
     return render_template('login.html', form=form)
